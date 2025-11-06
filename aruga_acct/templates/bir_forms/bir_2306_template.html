@@ -1,0 +1,148 @@
+<style>
+    .print-format {
+        font-family: monospace;
+        font-size: 0.80em;
+        width: 8.5in;
+        min-height: 14in;
+
+        margin-top: 0mm;
+        margin-left: 0mm;
+        margin-right: 0mm;
+        margin-bottom: 0mm;
+
+        padding-top: 0mm;
+        padding-left: 0mm;
+        padding-right: 0mm;
+        margin-bottom: 0mm;
+    }
+
+    .bir-form-text {
+        font-size: 0.80em;
+        width: 100%;
+        position: absolute;
+    }
+
+    .bir-form-text-center {
+        font-size: 0.80em;
+        width: 7.6in;
+        position: absolute;
+        text-align: center;
+    }
+
+    .bir-form-amount {
+        text-align: right;
+    }
+
+    .bir-form-data {
+        font-size: 0.70em;
+    }
+
+    table.table-income-payments {
+        left: 0.28in;
+        top: 5.44in;
+        width: 8in;
+    }
+
+    table.table-income-payments tr td {
+        height: 0.18in;
+        text-align: right;
+        vertical-align: top;
+        line-height: 0.18in;
+        padding-top: 0.02in;
+        padding-bottom: 0;
+    }
+</style>
+
+<div style="position: absolute; top: 0.18in; left: 6.80in; width: 1.30in; height: 0.5in; background-color: white;">
+</div>
+
+<div style="position: relative; left: -0.12in;"> <!-- offset from position in bir 2307 -->
+    <div style="left: 2.14in; top: 1.64in; letter-spacing: 0.1in;" class="bir-form-text">{{ from_date.strftime('%m') }}
+    </div>
+    <div style="left: 2.53in; top: 1.64in; letter-spacing: 0.1in;" class="bir-form-text">{{ from_date.strftime('%d') }}
+    </div>
+    <div style="left: 2.89in; top: 1.64in; letter-spacing: 0.1in;" class="bir-form-text">{{ from_date.strftime('%Y') }}
+    </div>
+</div>
+
+<div style="position: relative; left: -0.12in;"> <!-- offset from position in bir 2307 -->
+    <div style="left: 5.59in; top: 1.64in; letter-spacing: 0.1in;" class="bir-form-text">{{ to_date.strftime('%m') }}
+    </div>
+    <div style="left: 5.98in; top: 1.64in; letter-spacing: 0.1in;" class="bir-form-text">{{ to_date.strftime('%d') }}
+    </div>
+    <div style="left: 6.34in; top: 1.64in; letter-spacing: 0.1in;" class="bir-form-text">{{ to_date.strftime('%Y') }}
+    </div>
+</div>
+
+
+<div style="position: relative; left: -0.16in;"> <!-- offset from position in bir 2307 -->
+    <div style="left: 2.93in; top: 2.08in; letter-spacing: 0.1in;" class="bir-form-text">{{ payee.tin[:3] }}</div>
+    <div style="left: 3.63in; top: 2.08in; letter-spacing: 0.1in;" class="bir-form-text">{{ payee.tin[3:6] }}</div>
+    <div style="left: 4.35in; top: 2.08in; letter-spacing: 0.1in;" class="bir-form-text">{{ payee.tin[6:9] }}</div>
+    <div style="left: 5.08in; top: 2.08in; letter-spacing: 0.13in;" class="bir-form-text">{{ payee.tin[9:12] }}</div>
+</div>
+
+
+<div style="left: 0.53in; top: 2.50in;" class="bir-form-text">{{ payee.supplier_name }}</div>
+<div style="left: 0.53in; top: 2.92in;" class="bir-form-text">{{ payee.address }}</div>
+<div style="left: 7.58in; top: 2.92in; letter-spacing: 0.1in;" class="bir-form-text">{{ payee.zipcode[:4] }}</div>
+
+
+<div style="position: relative; left: -0.16in;"> <!-- offset from position in bir 2307 -->
+    <div style="left: 2.93in; top: 3.80in; letter-spacing: 0.1in;" class="bir-form-text">{{ payor.tin[:3] }}</div>
+    <div style="left: 3.63in; top: 3.80in; letter-spacing: 0.1in;" class="bir-form-text">{{ payor.tin[3:6] }}</div>
+    <div style="left: 4.35in; top: 3.80in; letter-spacing: 0.1in;" class="bir-form-text">{{ payor.tin[6:9] }}</div>
+    <div style="left: 5.08in; top: 3.80in; letter-spacing: 0.13in;" class="bir-form-text">{{ payor.tin[9:12] }}</div>
+</div>
+
+<div style="left: 0.53in; top: 4.22in;" class="bir-form-text">{{ payor.company_name }}</div>
+<div style="left: 0.53in; top: 4.64in;" class="bir-form-text">{{ payor.address }}</div>
+<div style="left: 7.58in; top: 4.64in; letter-spacing: 0.1in;" class="bir-form-text">{{ payor.zipcode[:4] }}</div>
+
+<div class="bir-form-data">
+    <div style="position: relative; top: -0.24in; left: -0.16in;"> <!-- offset from position in bir 2307 -->
+        <table class="bir-form-text table-income-payments">
+            <tbody>
+                {% for entry in data_ip %}
+                <tr>
+                    <td width="40%" style="text-align: center;">{{ entry.description }}</td>
+                    <td width="12.5%" style="text-align: center;">{{ entry.atc }}</td>
+                    <td width="20%" style="text-align: right;">{{ "{:,.2f}".format(entry.total) }}</td>
+                    <td width="20%" style="text-align: right;">{{ "{:,.2f}".format(entry.tax_withheld) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div style="position: relative; top: -0.36in; left: -0.16in;"> <!-- offset from position in bir 2307 -->
+        <table class="bir-form-text table-income-payments" style="top: 7.50in; ">
+            <tfoot>
+                <tr>
+                    <td width="40%" style="text-align: center;"></td>
+                    <td width="12.5%" style="text-align: center;"></td>
+                    <td width="20%" style="text-align: right;">{{ "{:,.2f}".format(ip_grand_total) }}</td>
+                    <td width="20%" style="text-align: right;">{{ "{:,.2f}".format(ip_tax_withheld_total) }}</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+<div style="left: 0.50in; top: 8.00in; width: 6.00in;" class="bir-form-text-center">
+    <span>{{ payor.authorized_representative_1 }} {{ " / " + payor.title_1 if payor.title_1 }} {{ " / " +
+        preformat_tin_with_dash(payor.tin_of_signatory_1) if payor.tin_of_signatory_1}}</span>
+</div>
+
+<div>
+    {% if is_local_dev() %}
+    <img src="https://raw.githubusercontent.com/mincerray1/phbir/master/phbir/public/img/forms/2306 Jan 2018 ENCS v3 Annex A-1.png"
+        height="100%" width="100%" style="position: absolute; top: 0; left: 0; z-index: -1;">
+    {% else %}
+    <img src="/assets/aruga_acct/img/forms/2306 Jan 2018 ENCS v3 Annex A-1.png" height="100%" width="100%"
+        style="position: absolute; top: 0; left: 0; z-index: -1;">
+    {% endif %}
+</div>
+
+<!-- <div style="page-break-before: always;">
+    <img src="/assets/phbir/img/forms/2307-2.png" height="100%" width="100%" style="position: absolute; top: 13in; left: 0; z-index: -1;">
+</div> -->

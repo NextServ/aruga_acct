@@ -1,0 +1,34 @@
+[
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "PH Tax Type Code",
+  "modified": "2021-08-17 10:28:26.015581",
+  "name": "WE",
+  "tax_type_code": "WE"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "PH Tax Type Code",
+  "modified": "2021-08-17 10:28:35.801223",
+  "name": "WF",
+  "tax_type_code": "WF"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "PH Tax Type Code",
+  "modified": "2021-08-17 10:28:40.397806",
+  "name": "WB",
+  "tax_type_code": "WB"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "PH Tax Type Code",
+  "modified": "2021-08-17 10:28:43.835472",
+  "name": "WV",
+  "tax_type_code": "WV"
+ }
+]

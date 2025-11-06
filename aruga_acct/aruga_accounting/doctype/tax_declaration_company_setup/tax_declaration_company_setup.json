@@ -1,0 +1,301 @@
+{
+  "actions": [],
+  "autoname": "field:company",
+  "creation": "2021-11-18 01:10:35.468911",
+  "description": "Tax Declaration Company Setup",
+  "doctype": "DocType",
+  "editable_grid": 1,
+  "engine": "InnoDB",
+  "field_order": [
+    "company",
+    "sales_section",
+    "vat_sales",
+    "sales_to_government",
+    "zero_rated_sales",
+    "exempt_sales",
+    "column_break_3",
+    "item_vat_sales",
+    "item_sales_to_government",
+    "item_zero_rated_sales",
+    "item_exempt_sales",
+    "purchases_section",
+    "capital_goods",
+    "domestic_purchases_of_goods",
+    "importation_of_goods",
+    "domestic_purchase_of_services",
+    "services_rendered_by_non_residents",
+    "others",
+    "directly_attributable_to_exempt_sales",
+    "directly_attributable_to_sale_to_government",
+    "column_break_7",
+    "item_capital_goods",
+    "item_domestic_purchases_of_goods",
+    "item_importation_of_goods",
+    "item_domestic_purchase_of_services",
+    "item_services_rendered_by_non_residents",
+    "item_others",
+    "item_directly_attributable_to_exempt_sales",
+    "item_directly_attributable_to_sale_to_government",
+    "section_break_31",
+    "zero_rated_purchase",
+    "exempt_purchase",
+    "column_break_34",
+    "item_zero_rated_purchase",
+    "item_exempt_purchase"
+  ],
+  "fields": [
+    {
+      "fieldname": "company",
+      "fieldtype": "Link",
+      "label": "Company",
+      "options": "Company",
+      "set_only_once": 1,
+      "unique": 1
+    },
+    {
+      "fieldname": "sales_section",
+      "fieldtype": "Section Break",
+      "label": "Sales"
+    },
+    {
+      "fieldname": "vat_sales",
+      "fieldtype": "Link",
+      "label": "VAT Sales",
+      "options": "Sales Taxes and Charges Template"
+    },
+    {
+      "fieldname": "sales_to_government",
+      "fieldtype": "Link",
+      "label": "Sales to Government",
+      "options": "Sales Taxes and Charges Template"
+    },
+    {
+      "fieldname": "zero_rated_sales",
+      "fieldtype": "Link",
+      "label": "Zero Rated Sales",
+      "options": "Sales Taxes and Charges Template"
+    },
+    {
+      "fieldname": "exempt_sales",
+      "fieldtype": "Link",
+      "label": "Exempt Sales",
+      "options": "Sales Taxes and Charges Template"
+    },
+    {
+      "fieldname": "column_break_3",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "item_vat_sales",
+      "fieldtype": "Link",
+      "label": "Item VAT Sales",
+      "options": "Item Tax Template"
+    },
+    {
+      "fieldname": "item_sales_to_government",
+      "fieldtype": "Link",
+      "label": "Item Sales to Government",
+      "options": "Item Tax Template"
+    },
+    {
+      "fieldname": "item_zero_rated_sales",
+      "fieldtype": "Link",
+      "label": "Item Zero Rated Sales",
+      "options": "Item Tax Template"
+    },
+    {
+      "fieldname": "item_exempt_sales",
+      "fieldtype": "Link",
+      "label": "Item Exempt Sales",
+      "options": "Item Tax Template"
+    },
+    {
+      "fieldname": "purchases_section",
+      "fieldtype": "Section Break",
+      "label": "Purchases"
+    },
+    {
+      "fieldname": "capital_goods",
+      "fieldtype": "Link",
+      "label": "Capital Goods",
+      "options": "Purchase Taxes and Charges Template"
+    },
+    {
+      "fieldname": "domestic_purchases_of_goods",
+      "fieldtype": "Link",
+      "label": "Domestic Purchases of Goods",
+      "options": "Purchase Taxes and Charges Template"
+    },
+    {
+      "fieldname": "importation_of_goods",
+      "fieldtype": "Link",
+      "label": "Importation of Goods",
+      "options": "Purchase Taxes and Charges Template"
+    },
+    {
+      "fieldname": "domestic_purchase_of_services",
+      "fieldtype": "Link",
+      "label": "Domestic Purchase of Services",
+      "options": "Purchase Taxes and Charges Template"
+    },
+    {
+      "fieldname": "services_rendered_by_non_residents",
+      "fieldtype": "Link",
+      "label": "Services Rendered by Non-residents",
+      "options": "Purchase Taxes and Charges Template"
+    },
+    {
+      "fieldname": "others",
+      "fieldtype": "Link",
+      "label": "Others",
+      "options": "Purchase Taxes and Charges Template"
+    },
+    {
+      "fieldname": "directly_attributable_to_exempt_sales",
+      "fieldtype": "Link",
+      "hidden": 1,
+      "label": "Directly Attributable to Exempt Sales",
+      "options": "Purchase Taxes and Charges Template"
+    },
+    {
+      "fieldname": "directly_attributable_to_sale_to_government",
+      "fieldtype": "Link",
+      "hidden": 1,
+      "label": "Directly Attributable to Sale to Government",
+      "options": "Purchase Taxes and Charges Template"
+    },
+    {
+      "fieldname": "column_break_7",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "item_capital_goods",
+      "fieldtype": "Link",
+      "label": "Item Capital Goods",
+      "options": "Item Tax Template"
+    },
+    {
+      "fieldname": "item_domestic_purchases_of_goods",
+      "fieldtype": "Link",
+      "label": "Item Domestic Purchases of Goods",
+      "options": "Item Tax Template"
+    },
+    {
+      "fieldname": "item_importation_of_goods",
+      "fieldtype": "Link",
+      "label": "Item Importation of Goods",
+      "options": "Item Tax Template"
+    },
+    {
+      "fieldname": "item_domestic_purchase_of_services",
+      "fieldtype": "Link",
+      "label": "Item Domestic Purchase of Services",
+      "options": "Item Tax Template"
+    },
+    {
+      "fieldname": "item_services_rendered_by_non_residents",
+      "fieldtype": "Link",
+      "label": "Item Services Rendered by Non-residents",
+      "options": "Item Tax Template"
+    },
+    {
+      "fieldname": "item_others",
+      "fieldtype": "Link",
+      "label": "Item Others",
+      "options": "Item Tax Template"
+    },
+    {
+      "fieldname": "item_directly_attributable_to_exempt_sales",
+      "fieldtype": "Link",
+      "hidden": 1,
+      "label": "Item Directly Attributable to Exempt Sales",
+      "options": "Item Tax Template"
+    },
+    {
+      "fieldname": "item_directly_attributable_to_sale_to_government",
+      "fieldtype": "Link",
+      "hidden": 1,
+      "label": "Item Directly Attributable to Sale to Government",
+      "options": "Item Tax Template"
+    },
+    {
+      "fieldname": "section_break_31",
+      "fieldtype": "Section Break",
+      "label": "Purchases Not Qualified for Input Tax"
+    },
+    {
+      "fieldname": "zero_rated_purchase",
+      "fieldtype": "Link",
+      "label": "Zero Rated Purchase",
+      "options": "Purchase Taxes and Charges Template"
+    },
+    {
+      "fieldname": "exempt_purchase",
+      "fieldtype": "Link",
+      "label": "Exempt Purchase",
+      "options": "Purchase Taxes and Charges Template"
+    },
+    {
+      "fieldname": "column_break_34",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "item_zero_rated_purchase",
+      "fieldtype": "Link",
+      "label": "Item Zero Rated Purchase",
+      "options": "Item Tax Template"
+    },
+    {
+      "fieldname": "item_exempt_purchase",
+      "fieldtype": "Link",
+      "label": "Item Exempt Purchase",
+      "options": "Item Tax Template"
+    }
+  ],
+  "index_web_pages_for_search": 1,
+  "links": [],
+  "modified": "2021-11-18 02:07:17.633037",
+  "modified_by": "Administrator",
+  "module": "Aruga Accounting",
+  "name": "Tax Declaration Company Setup",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "print": 1,
+      "read": 1,
+      "role": "System Manager",
+      "select": 1,
+      "share": 1,
+      "write": 1
+    },
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "print": 1,
+      "read": 1,
+      "role": "Accounts Manager",
+      "select": 1,
+      "share": 1,
+      "write": 1
+    },
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "print": 1,
+      "read": 1,
+      "role": "Auditor",
+      "select": 1,
+      "share": 1,
+      "write": 1
+    }
+  ],
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "title_field": "company",
+  "track_changes": 1
+}

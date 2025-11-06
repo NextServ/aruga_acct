@@ -1,0 +1,132 @@
+<h2 class="text-center">{%= __("ACCOUNTANT COPY") %}</h2>
+<h2 class="text-center">{%= __("SALES FOR THE MONTH OF ") %}{%= new Date(filters.from_date).toLocaleString('en-US', {
+    month: 'long', year: 'numeric' }).toUpperCase() %}</h2>
+{% let company_information = get_company_information(filters.company) %}
+<h6 class="text-left">
+    <div>
+        <span>COMPANY: </span>
+        <span>{%= filters.company.toUpperCase() %}</span>
+    </div>
+    {% if filters.branch %}
+    <div>
+        <span>BRANCH: </span>
+        <span>{%= filters.branch.toUpperCase() %}</span>
+    </div>
+    {% } %}
+    <div>
+        <span>SALES INVOICE </span>
+    </div>
+    <div>
+        <span>FOR THE MONTH OF </span>
+        <span>{%= new Date(filters.from_date).toLocaleString('en-US', { month: 'long', year: 'numeric' }).toUpperCase()
+            %}</span>
+    </div>
+    <div>
+        <span>SALES INVOICE - ITEMS: </span>
+    </div>
+    <div>
+        {% let no_of_records = 0 %}
+        {% for(var i=0, l=data.length; i<l; i++) { %} {% if(!data[i].is_total_row && !data[i].is_subtotal_row) { %} {%
+            no_of_records=no_of_records + 1 %} {% } %} {% } %} <span>No of Records: </span>
+            <span>{%= no_of_records %}</span>
+    </div>
+    <div>
+        <span>{%= __("Period Covered: ") %}</span>
+        <span>
+            {%= frappe.datetime.str_to_user(filters.from_date) %}
+            {%= __(" to ") %}
+            {%= frappe.datetime.str_to_user(filters.to_date) %}
+        </span>
+    </div>
+ 
+    <div>
+        <span>Printed On: </span>
+        <span>{%= frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) %}</span>
+    </div>
+    <div>
+        <span>Printed By: </span>
+        <span>{%= frappe.session.user %}</span>
+    </div>
+</h6>
+
+<hr>
+<table class="table table-bordered" style="font-size: 0.8em; table-layout: fixed;">
+    <thead>
+        <tr>
+            <th style="width: 8%; min-width: 8%; max-width: 8% !important;">{%= __("SI NOS.") %}</th>
+            <th style="width: 8%; min-width: 8%; max-width: 8% !important;">{%= __("Date") %}</th>
+            <th style="width: 10%; min-width: 10%; max-width: 10% !important; word-wrap: break-word;">{%= __("Customer
+                Name") %}</th>
+            <th style="width: 10%; min-width: 10%; max-width: 10% !important; word-wrap: break-word;">{%= __("TIN") %}
+            </th>
+            <th style="width: 8%; min-width: 8%; max-width: 8% !important; text-align: right;">{%= __("Invoice Amount")
+                %}</th>
+            <th style="width: 8%; min-width: 8%; max-width: 8% !important; text-align: right;">{%= __("NON-VAT ZERO
+                RATED") %}</th>
+            <th style="width: 8%; min-width: 8%; max-width: 8% !important; text-align: right;">{%= __("12% VAT") %}</th>
+            <th style="width: 8%; min-width: 8%; max-width: 8% !important; text-align: right;">{%= __("Net of Vat") %}
+            </th>
+            <th style="width: 8%; min-width: 8%; max-width: 8% !important; text-align: right;">{%= __("Total Sales W/
+                VAT") %}</th>
+            <th style="width: 8%; min-width: 8%; max-width: 8% !important; text-align: right;">{%= __("WITH E.W.T.") %}
+            </th>
+            <th style="width: 8%; min-width: 8%; max-width: 8% !important; text-align: right;">{%= __("WITHOUT E.W.T.")
+                %}</th>
+            <th style="width: 8%; min-width: 8%; max-width: 8% !important; text-align: right;">{%= __("TOTAL EWT") %}
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        {% let sum_invoice_amount = 0, sum_non_vat = 0, sum_tax_amount = 0, sum_total = 0, sum_sales_with_vat = 0,
+        sum_with_ewt = 0, sum_without_ewt = 0, sum_withholding_tax_amount = 0 %}
+        {% for(var i=0, l=data.length; i<l; i++) { %} {% if(!data[i].is_total_row && !data[i].is_subtotal_row) { %} <tr>
+            <td style="word-wrap: break-word;">{%= data[i].custom_manual_doc_no || '' %}</td>
+            <td>{%= frappe.datetime.str_to_user(data[i].posting_date) %}</td>
+            <td style="word-wrap: break-word;">{%= data[i].customer_name %}</td>
+            <td style="word-wrap: break-word;">{%= data[i].tax_id %}</td>
+            <td style="text-align: right;">{%= format_currency(data[i].invoice_amount, data[i].currency) %}</td>
+            <td style="text-align: right;">{%= format_currency(data[i].non_vat, data[i].currency) %}</td>
+            <td style="text-align: right;">{%= format_currency(data[i].tax_amount, data[i].currency) %}</td>
+            <td style="text-align: right;">{%= format_currency(data[i].total, data[i].currency) %}</td>
+            <td style="text-align: right;">{%= format_currency(data[i].sales_with_vat, data[i].currency) %}</td>
+            <td style="text-align: right;">{%= format_currency(data[i].with_ewt, data[i].currency) %}</td>
+            <td style="text-align: right;">{%= format_currency(data[i].without_ewt, data[i].currency) %}</td>
+            <td style="text-align: right;">{%= format_currency(data[i].withholding_tax_amount, data[i].currency) %}</td>
+            {% sum_invoice_amount = sum_invoice_amount + (data[i].invoice_amount || 0) %}
+            {% sum_non_vat = sum_non_vat + (data[i].non_vat || 0) %}
+            {% sum_tax_amount = sum_tax_amount + (data[i].tax_amount || 0) %}
+            {% sum_total = sum_total + (data[i].total || 0) %}
+            {% sum_sales_with_vat = sum_sales_with_vat + (data[i].sales_with_vat || 0) %}
+            {% sum_with_ewt = sum_with_ewt + (data[i].with_ewt || 0) %}
+            {% sum_without_ewt = sum_without_ewt + (data[i].without_ewt || 0) %}
+            {% sum_withholding_tax_amount = sum_withholding_tax_amount + (data[i].withholding_tax_amount || 0) %}
+            </tr>
+            {% } %}
+            {% } %}
+    </tbody>
+    <tfoot>
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td style="text-align: right;"><strong>{%= __("Grand Total") %}</strong></td>
+            <td style="text-align: right;"><strong>{%= format_currency(sum_invoice_amount, data[0].currency) %}</strong>
+            </td>
+            <td style="text-align: right;"><strong>{%= format_currency(sum_non_vat, data[0].currency) %}</strong></td>
+            <td style="text-align: right;"><strong>{%= format_currency(sum_tax_amount, data[0].currency) %}</strong>
+            </td>
+            <td style="text-align: right;"><strong>{%= format_currency(sum_total, data[0].currency) %}</strong></td>
+            <td style="text-align: right;"><strong>{%= format_currency(sum_sales_with_vat, data[0].currency) %}</strong>
+            </td>
+            <td style="text-align: right;"><strong>{%= format_currency(sum_with_ewt, data[0].currency) %}</strong></td>
+            <td style="text-align: right;"><strong>{%= format_currency(sum_without_ewt, data[0].currency) %}</strong>
+            </td>
+            <td style="text-align: right;"><strong>{%= format_currency(sum_withholding_tax_amount, data[0].currency)
+                    %}</strong></td>
+        </tr>
+    </tfoot>
+</table>
+
+<p class="text-right text-muted">Printed On {%= frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) %}
+</p>
+<p class="text-right text-muted">Printed By {%= frappe.session.user %}</p>

@@ -1,0 +1,132 @@
+<h2 class="text-center">{%= __("Cash Disbursements Journal") %}</h2>
+<!-- erpnext.get_currency(frappe.defaults.get_default("company")) -->
+{% let currency = erpnext.get_currency(filters.company) %}
+{% let company_information = get_company_information(filters.company) %}
+<h6 class="text-left">
+    <div>
+        <span>Company:</span>
+        <span class="">{%= filters.company %}</span>
+        <span></span>
+    </div>
+    <div>
+        <span>Address: </span>
+        <span class="">{%= company_information.address %}</span>
+    </div>
+    <div>
+        <span>TIN: </span>
+        <span class="">{%= company_information.tin %}</span>
+    </div>
+    <div>
+        <span>Permit No: </span>
+        <span class="">{%= company_information.permit_no %}</span>
+    </div>
+    <div>
+        <span>Date of Permit: </span>
+        <span class="">{%= (company_information.permit_date_issued != '' ? frappe.datetime.str_to_user(company_information.permit_date_issued) : '') %}</span>
+    </div>
+    <div>
+        <span>Taxable Year: </span>
+        <span class="">{%= (new Date(filters.from_date)).getFullYear() %}</span>
+    </div>
+    <div>
+        <span>Report: </span>
+        <span class="">{%= __("Cash Disbursements Journal") %}</span>
+    </div>
+
+    {% let no_of_records = 0 %}
+    {% for(var i=0, l=data.length; i<l; i++) { %}
+        {% if(!data[i].is_total_row && !data[i].is_subtotal_row) { %}
+            {% no_of_records = no_of_records + 1 %}
+        {% } %}
+    {% } %}
+    <div>
+        <span>No of Records: </span>
+        <span class="">{%= no_of_records %}</span>
+    </div>
+    <div>
+        <span>{%= __("Period Covered: ") %}</span>        
+        <span>
+            {%= frappe.datetime.str_to_user(filters.from_date) %}
+            {%= __("to") %}
+            {%= frappe.datetime.str_to_user(filters.to_date) %}
+        </span>
+    </div>
+    <div>
+        <span>Software Name & Version: </span>
+        <span class="">ERPNext v{%= company_information.erpnext_version %}</span>
+    </div>
+    <div>
+        <span>Printed On: </span>
+        <span class="">{%= frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) %}</span>
+    </div>
+    <div>
+        <span>Printed By: </span>
+        <span class="">{%= frappe.session.user %}</span>
+    </div>
+</h6>
+
+<hr>
+<table class="table table-bordered" style="font-size: 0.8em">
+	<thead>
+		<tr>
+			<th style="width: 7%">{%= __("Date") %}</th>
+			<th style="width: 8%">{%= __("Reference Type") %}</th>
+			<th style="width: 12%">{%= __("Reference") %}</th>
+			<th style="width: 10%">{%= __("Customer") %}</th>
+			<th style="width: 20%">{%= __("Brief Description/Explanation") %}</th>
+            <th style="width: 8%">{%= __("Account Code") %}</th>
+            <th style="width: 15%">{%= __("Account Name") %}</th>
+            
+			<th style="width: 10%">{%= __("Debit") %}</th>
+			<th style="width: 10%">{%= __("Credit") %}</th>
+		</tr>
+	</thead>
+	<tbody>
+        {% let sum_debit = 0, sum_credit = 0 %}
+        
+		{% for(var i=0, l=data.length; i<l; i++) { %}
+            {% if(!data[i].is_total_row) { %}
+
+			    <tr>
+                    <td>{%= frappe.datetime.str_to_user(data[i].posting_date) %}</td>
+                    <td>{%= data[i].voucher_type %}</td>
+                    <td>{%= data[i].voucher_no %}</td>
+                    <td>{%= data[i].party_name %}</td>
+                    <td>{%= data[i].remarks %}</td>
+                    <td>{%= data[i].account_number %}</td>
+
+                    {% if(data[i].is_subtotal_row == 0) { %}
+                        <td>{%= data[i].account_name %}</td>
+                        <td style="text-align: right">{%= format_currency(data[i].debit, currency) %}</td>
+                        <td style="text-align: right">{%= format_currency(data[i].credit, currency) %}</td>
+                    {% } %}
+
+                    {% if(data[i].is_subtotal_row == 1) { %}
+                        <td style="text-align: right"><strong>{%= data[i].account_name %}</strong></td>
+                        <td style="text-align: right"><strong>{%= format_currency(data[i].debit, currency) %}</strong></td>
+                        <td style="text-align: right"><strong>{%= format_currency(data[i].credit, currency) %}</strong></td>
+                    {% } %}
+
+                    {% sum_debit = sum_debit + data[i].debit %}
+                    {% sum_credit = sum_credit + data[i].credit %}
+                </tr>
+                
+            {% } %}
+		{% } %}
+    </tbody>
+    <tfoot>
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td style="text-align: right"><strong>Grand Total</strong></td>
+            <td style="text-align: right"><strong>{%= format_currency(sum_debit, currency) %}</strong></td>
+            <td style="text-align: right"><strong>{%= format_currency(sum_credit, currency) %}</strong></td>
+        </tr>
+    </tfoot>
+</table>
+
+<p class="text-right text-muted">Printed On {%= frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) %}</p>

@@ -1,0 +1,179 @@
+<style>
+    .print-format {
+        font-family: monospace;
+        font-size: 0.80em;
+        width: 8.5in;
+        min-height: 14in;
+
+        margin-top: 0mm;
+        margin-left: 0mm;
+        margin-right: 0mm;
+        margin-bottom: 0mm;
+
+        padding-top: 0mm;
+        padding-left: 0mm;
+        padding-right: 0mm;
+        margin-bottom: 0mm;
+    }
+
+    .bir-form-text {
+        font-size: 0.80em;
+        width: 100%;
+        position: absolute;
+    }
+
+    .bir-form-text-center {
+        font-size: 0.80em;
+        width: 7.6in;
+        position: absolute;
+        text-align: center;
+    }
+
+    .bir-form-amount {
+        text-align: right;
+    }
+
+    .bir-form-data {
+        font-size: 0.70em;
+    }
+
+    table.table-income-payments {
+        left: 0.28in;
+        top: 5.44in;
+        width: 8in;
+    }
+
+    table.table-income-payments tr td {
+        height: 0.20in;
+        text-align: right;
+        vertical-align: top;
+        line-height: 0.20in;
+    }
+
+    table.table-money-payments {
+        left: 0.28in;
+        top: 7.98in;
+        width: 8in;
+    }
+
+    table.table-money-payments tr td {
+        height: 0.20in;
+        text-align: right;
+        vertical-align: top;
+        line-height: 0.20in;
+    }
+</style>
+<div style="left: 2.14in; top: 1.64in; letter-spacing: 0.1in;" class="bir-form-text">{{ from_date.strftime('%m') }}
+</div>
+<div style="left: 2.53in; top: 1.64in; letter-spacing: 0.1in;" class="bir-form-text">{{ from_date.strftime('%d') }}
+</div>
+<div style="left: 2.89in; top: 1.64in; letter-spacing: 0.1in;" class="bir-form-text">{{ from_date.strftime('%Y') }}
+</div>
+
+
+<div style="left: 2.93in; top: 2.08in; letter-spacing: 0.1in;" class="bir-form-text">{{ payee.tin[:3] }}</div>
+<div style="left: 3.63in; top: 2.08in; letter-spacing: 0.1in;" class="bir-form-text">{{ payee.tin[3:6] }}</div>
+<div style="left: 4.35in; top: 2.08in; letter-spacing: 0.1in;" class="bir-form-text">{{ payee.tin[6:9] }}</div>
+<div style="left: 5.08in; top: 2.08in; letter-spacing: 0.13in;" class="bir-form-text">{{ payee.tin[9:12] }}</div>
+
+
+<div style="left: 0.53in; top: 2.50in;" class="bir-form-text">{{ payee.supplier_name or payee.employee_name }}</div>
+<div style="left: 0.53in; top: 2.92in;" class="bir-form-text">{{ payee.address or '' }}</div>
+<div style="left: 7.58in; top: 2.92in; letter-spacing: 0.1in;" class="bir-form-text">{{ payee.zipcode[:4] }}</div>
+
+<div style="left: 5.59in; top: 1.64in; letter-spacing: 0.1in;" class="bir-form-text">{{ to_date.strftime('%m') }}</div>
+<div style="left: 5.98in; top: 1.64in; letter-spacing: 0.1in;" class="bir-form-text">{{ to_date.strftime('%d') }}</div>
+<div style="left: 6.34in; top: 1.64in; letter-spacing: 0.1in;" class="bir-form-text">{{ to_date.strftime('%Y') }}</div>
+
+<div style="left: 2.93in; top: 3.80in; letter-spacing: 0.1in;" class="bir-form-text">{{ payor.tin[:3] }}</div>
+<div style="left: 3.63in; top: 3.80in; letter-spacing: 0.1in;" class="bir-form-text">{{ payor.tin[3:6] }}</div>
+<div style="left: 4.35in; top: 3.80in; letter-spacing: 0.1in;" class="bir-form-text">{{ payor.tin[6:9] }}</div>
+<div style="left: 5.08in; top: 3.80in; letter-spacing: 0.13in;" class="bir-form-text">{{ payor.tin[9:12] }}</div>
+
+
+<div style="left: 0.53in; top: 4.22in;" class="bir-form-text">{{ payor.company_name }}</div>
+<div style="left: 0.53in; top: 4.64in;" class="bir-form-text">{{ payor.address }}</div>
+<div style="left: 7.58in; top: 4.64in; letter-spacing: 0.1in;" class="bir-form-text">{{ payor.zipcode[:4] }}</div>
+
+<div class="bir-form-data">
+    <table class="bir-form-text table-income-payments">
+        <tbody>
+            {% for entry in data_ip %}
+            <tr>
+                <td width="27%" style="text-align: center;">{{ entry.description }}</td>
+                <td width="7%" style="text-align: center;">{{ entry.atc }}</td>
+                <td width="12%" style="text-align: right;">{{ "{:,.2f}".format(entry.month_1) }}</td>
+                <td width="13%" style="text-align: right;">{{ "{:,.2f}".format(entry.month_2) }}</td>
+                <td width="12.5%" style="text-align: right;">{{ "{:,.2f}".format(entry.month_3) }}</td>
+                <td width="12.5%" style="text-align: right;">{{ "{:,.2f}".format(entry.total) }}</td>
+                <td width="15%" style="text-align: right;">{{ "{:,.2f}".format(entry.tax_withheld_for_the_quarter) }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <table class="bir-form-text table-income-payments" style="top: 7.50in; ">
+        <tfoot>
+            <tr>
+                <td width="27%" style="text-align: center;"></td>
+                <td width="7%" style="text-align: center;"></td>
+                <td width="12%" style="text-align: right;">{{ "{:,.2f}".format(ip_month_1_total) }}</td>
+                <td width="13%" style="text-align: right;">{{ "{:,.2f}".format(ip_month_2_total) }}</td>
+                <td width="12.5%" style="text-align: right;">{{ "{:,.2f}".format(ip_month_3_total) }}</td>
+                <td width="12.5%" style="text-align: right;">{{ "{:,.2f}".format(ip_grand_total) }}</td>
+                <td width="15%" style="text-align: right;">{{ "{:,.2f}".format(ip_tax_withheld_for_the_quarter_total) }}
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <table class="bir-form-text table-money-payments">
+        <tbody>
+            {% for entry in data_mp %}
+            <tr>
+                <td width="27%" style="text-align: center;">{{ entry.description }}</td>
+                <td width="7%" style="text-align: center;">{{ entry.atc }}</td>
+                <td width="12%" style="text-align: right;">{{ "{:,.2f}".format(entry.month_1) }}</td>
+                <td width="13%" style="text-align: right;">{{ "{:,.2f}".format(entry.month_2) }}</td>
+                <td width="12.5%" style="text-align: right;">{{ "{:,.2f}".format(entry.month_3) }}</td>
+                <td width="12.5%" style="text-align: right;">{{ "{:,.2f}".format(entry.total) }}</td>
+                <td width="15%" style="text-align: right;">{{ "{:,.2f}".format(entry.tax_withheld_for_the_quarter) }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <table class="bir-form-text table-income-payments" style="top: 10.04in; ">
+        <tfoot>
+            <tr>
+                <td width="27%" style="text-align: center;"></td>
+                <td width="7%" style="text-align: center;"></td>
+                <td width="12%" style="text-align: right;">{{ "{:,.2f}".format(mp_month_1_total) }}</td>
+                <td width="13%" style="text-align: right;">{{ "{:,.2f}".format(mp_month_2_total) }}</td>
+                <td width="12.5%" style="text-align: right;">{{ "{:,.2f}".format(mp_month_3_total) }}</td>
+                <td width="12.5%" style="text-align: right;">{{ "{:,.2f}".format(mp_grand_total) }}</td>
+                <td width="15%" style="text-align: right;">{{ "{:,.2f}".format(mp_tax_withheld_for_the_quarter_total) }}
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+
+<div style="left: 0.50in; top: 10.90in;" class="bir-form-text-center">
+    <span>{{ payor.authorized_representative_1 }} {{ " / " + payor.title_1 if payor.title_1 }} {{ " / " +
+        preformat_tin_with_dash(payor.tin_of_signatory_1) if payor.tin_of_signatory_1}}</span>
+</div>
+
+<div>
+    {% if is_local_dev() %}
+    <img src="https://raw.githubusercontent.com/mincerray1/phbir/master/phbir/public/img/forms/2307-1.png" height="100%"
+        width="100%" style="position: absolute; top: 0; left: 0; z-index: -1;">
+    {% else %}
+    <img src="/assets/aruga_acct/img/forms/2307-1.png" height="100%" width="100%"
+        style="position: absolute; top: 0; left: 0; z-index: -1;">
+    {% endif %}
+</div>
+
+<!-- <div style="page-break-before: always;">
+    <img src="/assets/phbir/img/forms/2307-2.png" height="100%" width="100%" style="position: absolute; top: 13in; left: 0; z-index: -1;">
+</div> -->

@@ -1,0 +1,109 @@
+{
+  "actions": [],
+  "allow_import": 1,
+  "autoname": "field:atc",
+  "creation": "2021-08-17 10:25:42.769359",
+  "doctype": "DocType",
+  "editable_grid": 1,
+  "engine": "InnoDB",
+  "field_order": [
+    "atc",
+    "description",
+    "rate",
+    "column_break_4",
+    "atc_class",
+    "tax_type_code",
+    "additional_information",
+    "form_type",
+    "column_break_9",
+    "f1600"
+  ],
+  "fields": [
+    {
+      "fieldname": "atc",
+      "fieldtype": "Data",
+      "in_list_view": 1,
+      "label": "ATC",
+      "reqd": 1,
+      "unique": 1
+    },
+    {
+      "fieldname": "description",
+      "fieldtype": "Small Text",
+      "in_list_view": 1,
+      "in_standard_filter": 1,
+      "label": "Description"
+    },
+    {
+      "fieldname": "rate",
+      "fieldtype": "Percent",
+      "label": "Rate",
+      "reqd": 1
+    },
+    {
+      "fieldname": "column_break_4",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "atc_class",
+      "fieldtype": "Select",
+      "in_list_view": 1,
+      "label": "ATC Class",
+      "options": "\nIndividual\nCorporate"
+    },
+    {
+      "fieldname": "tax_type_code",
+      "fieldtype": "Link",
+      "in_list_view": 1,
+      "in_standard_filter": 1,
+      "label": "Tax Type Code",
+      "options": "PH Tax Type Code"
+    },
+    {
+      "fieldname": "form_type",
+      "fieldtype": "Select",
+      "label": "Form Type",
+      "options": "\n2304\n2306\n2307"
+    },
+    {
+      "fieldname": "column_break_9",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "f1600",
+      "fieldtype": "Data",
+      "label": "F1600",
+      "length": 2
+    },
+    {
+      "collapsible": 1,
+      "fieldname": "additional_information",
+      "fieldtype": "Section Break",
+      "label": "Additional Information"
+    }
+  ],
+  "index_web_pages_for_search": 1,
+  "links": [],
+  "modified": "2021-10-18 16:30:07.554768",
+  "modified_by": "Administrator",
+  "module": "Aruga Accounting",
+  "name": "ATC",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "System Manager",
+      "share": 1,
+      "write": 1
+    }
+  ],
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "track_changes": 1
+}

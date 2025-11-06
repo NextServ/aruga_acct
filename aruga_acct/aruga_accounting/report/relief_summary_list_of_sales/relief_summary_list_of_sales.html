@@ -1,0 +1,88 @@
+<!-- erpnext.get_currency(frappe.defaults.get_default("company")) -->
+{% let company_information = get_company_information(filters.company) %}
+<!-- {% let currency = erpnext.get_currency(filters.company) %} -->
+{% const options = {minimumFractionDigits: 2, maximumFractionDigits: 2 } %}
+
+<div>
+    <div style="font-weight: bold;">Bureau of Internal Revenue</div>
+    <div style="font-weight: bold;">Reconciliation of Listings for Enforcement System</div>
+    <div style="font-weight: bold;">Summary List of Sales</div>
+    <div><span style="font-weight: bold;">Report Date:</span> {%= moment().format('D MMMM YYYY', frappe.datetime.get_today()) %}</div>
+    <hr />
+    <div style="padding-left: 0.20in; padding-right: 0.20in;">
+        <div><span style="font-weight: bold;">TIN of Owner:</span> {%= company_information.tin_with_dash.substring(0, 11) %}</div>
+        <div style="width: 100%;">
+            <span style="width: 50%;"><span style="font-weight: bold;">Registered Name:</span> {%= company_information.registered_name %}</span>
+        </div>
+        <div>
+            <span style="width: 50%;"><span style="font-weight: bold;">Owner's Address:</span> 
+                {%= company_information.address_line1 + (company_information.address_line2 != "" ? " " + company_information.address_line2 : "")
+                 + (company_information.city != "" ? " " + company_information.city : "") + (company_information.state != "" ? " " + company_information.state : "") %}
+            </span>
+        </div>
+        <div><span style="font-weight: bold;">Trade Name:</span> {%= company_information.company_name %}</div>
+    </div>
+    <hr />
+    <div>
+        <strong>Taxable Month:</strong> {%= moment.months(filters.month - 1) %} {%= filters.year %}
+    </div>
+    
+    <br />
+    <table>
+        <thead>
+            <tr>
+                <th>TIN</th>
+                <th>Registered Name</th>
+                <th>Name of Customer</th>
+                <th>Customer's Address</th>
+                <th style= "text-align: right;">Gross Sales</th>
+                <th style= "text-align: right;">Exempt Sales</th>
+                <th style= "text-align: right;">Zero Rated Sales</th>
+                <th style= "text-align: right;">Taxable Sales</th>
+                <th style= "text-align: right;">Output Tax</th>
+                <th style= "text-align: right;">Gross Taxable Sales</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for(var i=0, l=data.length; i<l; i++) { %}
+                {% if(!data[i].is_total_row) { %}
+                    <tr>
+                        <td>{%= data[i].tin_with_dash %}</td>
+                        <td>{%= data[i].customer.toUpperCase() %}</td>
+                        <td>
+                            {%= data[i].customer_type == 'Individual' ? 
+                            ((data[i].contact_last_name != '' ? data[i].contact_last_name.toUpperCase() : '') + 
+                            (data[i].contact_first_name != '' || data[i].contact_middle_name != '' ? ', ' : '') + 
+                            (data[i].contact_first_name != '' ? data[i].contact_first_name.toUpperCase() : '') + 
+                            (data[i].contact_middle_name != '' ? data[i].contact_middle_name.toUpperCase() : '')) 
+                             : '' %}
+                        </td>
+                        <td>
+                            {%= (data[i].address_line1 + (data[i].city != "" ? " " + data[i].city : "")).toUpperCase() %}
+                        </td>
+                        <td style= "text-align: right;">{%= Number(data[i].total_sales).toLocaleString('en', options) %}</td>
+                        <td style= "text-align: right;">{%= Number(data[i].exempt).toLocaleString('en', options) %}</td>
+                        <td style= "text-align: right;">{%= Number(data[i].zero_rated).toLocaleString('en', options) %}</td>
+                        <td style= "text-align: right;">{%= Number(data[i].taxable_net).toLocaleString('en', options) %}</td>
+                        <td style= "text-align: right;">{%= Number(data[i].output_tax).toLocaleString('en', options) %}</td>
+                        <td style= "text-align: right;">{%= Number(data[i].gross_taxable).toLocaleString('en', options) %}</td>
+                    </tr>
+                {% } %}
+            {% } %}
+        </tbody>
+        <tfoot>
+            <tr style="border-top: 1px solid black; border-bottom: double black;">
+                <td><strong>Grand Total</strong></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td style="text-align: right; font-weight: bold;">{%= Number(data[data.length - 1].total_sales).toLocaleString('en', options) %}</td>
+                <td style="text-align: right; font-weight: bold;">{%= Number(data[data.length - 1].exempt).toLocaleString('en', options) %}</td>
+                <td style="text-align: right; font-weight: bold;">{%= Number(data[data.length - 1].zero_rated).toLocaleString('en', options) %}</td>
+                <td style="text-align: right; font-weight: bold;">{%= Number(data[data.length - 1].taxable_net).toLocaleString('en', options) %}</td>
+                <td style="text-align: right; font-weight: bold;">{%= Number(data[data.length - 1].output_tax).toLocaleString('en', options) %}</td>
+                <td style="text-align: right; font-weight: bold;">{%= Number(data[data.length - 1].gross_taxable).toLocaleString('en', options) %}</td>
+            </tr>
+        </tfoot>
+    </table>
+</div>

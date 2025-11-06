@@ -1,0 +1,260 @@
+<style>
+    .print-format {
+        font-family: monospace;
+        font-size: 0.80em;
+        width: 8.5in;
+        height: 11in;
+
+        margin-top: 0mm;
+        margin-left: 0mm;
+        margin-right: 0mm;
+        margin-bottom: 0mm;
+
+        padding-top: 0mm;
+        padding-left: 0mm;
+        padding-right: 0mm;
+        margin-bottom: 0mm;
+    }
+
+    .bir-form-text {
+        font-size: 0.80em;
+        width: 100%;
+        position: absolute;
+    }
+
+    .bir-form-text-footer {
+        font-size: 0.80em;
+        position: absolute;
+        text-align: center;
+    }
+
+    .bir-form-amount {
+        text-align: right;
+    }
+
+    .bir-form-data {
+        font-size: 0.70em;
+    }
+</style>
+
+<div style="left: 1.11in; top: 1.54in; letter-spacing: 0.1in;" class="bir-form-text">{{ year }}</div>
+<div style="left: 0.72in; top: 1.54in; letter-spacing: 0.1in;" class="bir-form-text">{{ month }}</div>
+
+<div style="left: 2.49in; top: 1.54in; letter-spacing: 0.1in;" class="bir-form-text">{{ due_date.strftime('%m') }}</div>
+<div style="left: 2.88in; top: 1.54in; letter-spacing: 0.1in;" class="bir-form-text">{{ due_date.strftime('%d') }}</div>
+<div style="left: 3.31in; top: 1.54in; letter-spacing: 0.1in;" class="bir-form-text">{{ due_date.strftime('%Y') }}</div>
+
+{% if amended_form %}
+<div style="left: 4.46in; top: 1.56in; letter-spacing: 0.11in;" class="bir-form-text">✗</div>
+{% else %}
+<div style="left: 5.09in; top: 1.56in; letter-spacing: 0.11in;" class="bir-form-text">✗</div>
+{% endif %}
+
+{% if any_taxes_withheld %}
+<div style="left: 5.88in; top: 1.56in; letter-spacing: 0.11in;" class="bir-form-text">✗</div>
+{% else %}
+<div style="left: 6.48in; top: 1.56in; letter-spacing: 0.11in;" class="bir-form-text">✗</div>
+{% endif %}
+
+<div style="left: 3.10in; top: 2.02in; letter-spacing: 0.12in;" class="bir-form-text">{{ company.tin[:3] }}</div>
+<div style="left: 3.89in; top: 2.02in; letter-spacing: 0.12in;" class="bir-form-text">{{ company.tin[3:6] }}</div>
+<div style="left: 4.68in; top: 2.02in; letter-spacing: 0.12in;" class="bir-form-text">{{ company.tin[6:9] }}</div>
+<div style="left: 5.50in; top: 2.02in; letter-spacing: 0.12in;" class="bir-form-text">{{ company.tin[9:12] }}</div>
+
+<div style="left: 7.50in; top: 2.02in; letter-spacing: 0.12in;" class="bir-form-text">{{ company.rdo_code[:3] }}</div>
+
+<div style="left: 0.32in; top: 2.40in; letter-spacing: 0.10in" class="bir-form-text">{{ company.company_name.upper() }}
+</div>
+
+<div style="left: 0.32in; top: 2.80in; letter-spacing: 0.10in;" class="bir-form-text">{{ company.address.upper() }}
+</div>
+<div style="left: 7.48in; top: 3.08in; letter-spacing: 0.12in;" class="bir-form-text">{{ company.zipcode[:4] }}</div>
+
+<div style="left: 1.50in; top: 3.33in; letter-spacing: 0.11in;" class="bir-form-text">{{ company.phone }}</div>
+
+{% if company.withholding_agent_category == 'Government' %}
+<div style="left: 7.14in; top: 3.33in; letter-spacing: 0.11in;" class="bir-form-text">✗</div>
+{% else %}
+<div style="left: 6.18in; top: 3.33in; letter-spacing: 0.11in;" class="bir-form-text">✗</div>
+{% endif %}
+
+<div style="left: 0.32in; top: 3.72in; letter-spacing: 0.11in;" class="bir-form-text">{{ company.email_id.upper() }}
+</div>
+
+<!-- <div style="left: 4.68in; top: 7.47in;" class="bir-form-text">{{ company.authorized_representative_1.upper() }}</div> -->
+
+<div style="left: 4.68in; top: 7.47in; width: 3.40in; text-align: center; font-size: 0.7em;"
+    class="bir-form-text-footer">
+    <span>{{ company.authorized_representative_1 }}{{ " / " + company.title_1 if company.title_1 }}{{ " / " +
+        preformat_tin_with_dash(company.tin_of_signatory_1) if company.tin_of_signatory_1 }}</span>
+</div>
+
+<div class="bir-form-data">
+    <!-- remittance -->
+    <table class="bir-form-text table-data" style="width: 2.90in; left: 5.44in; top: 4.30in;" cell-spacing="0">
+        <tbody>
+            <tr>
+                <td style="text-align: right; padding: 0; letter-spacing: 0.15in; height: 0.23in;"
+                    class="bir-form-amount">
+                    {{ "{:.2f}".format(amount_of_remittance_wmf10) }}
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: right; padding: 0; letter-spacing: 0.15in; height: 0.23in;"
+                    class="bir-form-amount">
+                    {{ "{:.2f}".format(amount_of_remittance_wmf20) }}
+                </td>
+            </tr>
+            <td style="text-align: right; padding: 0; letter-spacing: 0.15in; height: 0.23in;" class="bir-form-amount">
+                {{ "{:.2f}".format((amount_of_remittance_wmf10 + amount_of_remittance_wmf20)) }}
+            </td>
+            <tr>
+                <td style="text-align: right; padding: 0; letter-spacing: 0.15in; height: 0.23in;"
+                    class="bir-form-amount">
+                    {{ "{:.2f}".format(amount_remitted) }}
+                </td>
+            </tr>
+            <td style="text-align: right; padding: 0; letter-spacing: 0.15in; height: 0.23in;" class="bir-form-amount">
+                {{ "{:.2f}".format(((amount_of_remittance_wmf10 + amount_of_remittance_wmf20) - amount_remitted)) }}
+            </td>
+            </tr>
+        </tbody>
+    </table>
+    <!-- penalties/total -->
+    <table class="bir-form-text table-data" style="width: 2.90in; left: 5.44in; top: 5.71in;" cell-spacing="0">
+        <tbody>
+            <tr>
+                <td style="text-align: right; padding: 0; letter-spacing: 0.15in; height: 0.23in;"
+                    class="bir-form-amount">
+                    {{ "{:.2f}".format(surcharge) }}
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: right; padding: 0; letter-spacing: 0.15in; height: 0.23in;"
+                    class="bir-form-amount">
+                    {{ "{:.2f}".format(interest) }}
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: right; padding: 0; letter-spacing: 0.15in; height: 0.23in;"
+                    class="bir-form-amount">
+                    {{ "{:.2f}".format(compromise) }}
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: right; padding: 0; letter-spacing: 0.15in; height: 0.23in;"
+                    class="bir-form-amount">
+                    {{ "{:.2f}".format(surcharge + interest + compromise) }}
+                </td>
+            </tr>
+            <td style="text-align: right; padding: 0; letter-spacing: 0.15in; height: 0.23in;" class="bir-form-amount">
+                {{ "{:.2f}".format(((amount_of_remittance_wmf10 + amount_of_remittance_wmf20) - amount_remitted) +
+                (surcharge + interest + compromise)) }}
+            </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div style="position: relative; top: 0.17in; left: -0.08in;"> <!-- adjust position relative to 0619-E -->
+        <!-- payment details cash/check/tax debit memo -->
+        <div style="left: 1.70in; top: 8.65in; letter-spacing: 0.14in;" class="bir-form-text">{{
+            cash_drawee_bank.upper() }}</div>
+        <div style="left: 1.70in; top: 8.90in; letter-spacing: 0.14in;" class="bir-form-text">{{
+            check_drawee_bank.upper() }}</div>
+
+        <div style="left: 2.70in; top: 8.65in; letter-spacing: 0.14in;" class="bir-form-text">{{ cash_number.upper() }}
+        </div>
+        <div style="left: 2.70in; top: 8.90in; letter-spacing: 0.14in;" class="bir-form-text">{{ check_number.upper() }}
+        </div>
+        <div style="left: 2.70in; top: 9.15in; letter-spacing: 0.14in;" class="bir-form-text">{{
+            tax_debit_memo_number.upper() }}</div>
+
+        {% if cash_date %}
+        <div style="left: 3.90in; top: 8.65in; letter-spacing: 0.14in;" class="bir-form-text">{{
+            cash_date.strftime('%m') }}</div>
+        <div style="left: 4.31in; top: 8.65in; letter-spacing: 0.14in;" class="bir-form-text">{{
+            cash_date.strftime('%d') }}</div>
+        <div style="left: 4.72in; top: 8.65in; letter-spacing: 0.14in;" class="bir-form-text">{{
+            cash_date.strftime('%Y') }}</div>
+        {% endif %}
+
+        {% if check_date %}
+        <div style="left: 3.90in; top: 8.90in; letter-spacing: 0.14in;" class="bir-form-text">{{
+            check_date.strftime('%m') }}</div>
+        <div style="left: 4.31in; top: 8.90in; letter-spacing: 0.14in;" class="bir-form-text">{{
+            check_date.strftime('%d') }}</div>
+        <div style="left: 4.72in; top: 8.90in; letter-spacing: 0.14in;" class="bir-form-text">{{
+            check_date.strftime('%Y') }}</div>
+        {% endif %}
+
+        {% if tax_debit_memo_date %}
+        <div style="left: 3.90in; top: 9.15in; letter-spacing: 0.14in;" class="bir-form-text">{{
+            tax_debit_memo_date.strftime('%m') }}</div>
+        <div style="left: 4.31in; top: 9.15in; letter-spacing: 0.14in;" class="bir-form-text">{{
+            tax_debit_memo_date.strftime('%d') }}</div>
+        <div style="left: 4.72in; top: 9.15in; letter-spacing: 0.14in;" class="bir-form-text">{{
+            tax_debit_memo_date.strftime('%Y') }}</div>
+        {% endif %}
+
+        <!-- payment details amount, these are put inside table to allow right align -->
+        <table class="bir-form-text table-data" style="width: 2.90in; left: 5.44in; top: 8.57in;" cell-spacing="0">
+            <tbody>
+                <tr>
+                    <td style="text-align: right; padding: 0; letter-spacing: 0.15in; height: 0.23in;"
+                        class="bir-form-amount">
+                        {{ "{:.2f}".format(cash_amount) }}
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: right; padding: 0; letter-spacing: 0.15in; height: 0.23in;"
+                        class="bir-form-amount">
+                        {{ "{:.2f}".format(check_amount) }}
+                    </td>
+                </tr>
+                <td style="text-align: right; padding: 0; letter-spacing: 0.15in; height: 0.23in;"
+                    class="bir-form-amount">
+                    {{ "{:.2f}".format((tax_debit_memo_amount)) }}
+                </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- others -->
+        <div style="left: 0.32in; top: 9.55in; letter-spacing: 0.14in" class="bir-form-text">{{ others_name.upper() }}
+        </div>
+        <div style="left: 1.70in; top: 9.55in; letter-spacing: 0.14in;" class="bir-form-text">{{
+            others_drawee_bank.upper() }}</div>
+        <div style="left: 2.70in; top: 9.55in; letter-spacing: 0.14in;" class="bir-form-text">{{ others_number.upper()
+            }}</div>
+
+        {% if others_date %}
+        <div style="left: 3.90in; top: 9.55in; letter-spacing: 0.14in;" class="bir-form-text">{{
+            others_date.strftime('%m') }}</div>
+        <div style="left: 4.31in; top: 9.55in; letter-spacing: 0.14in;" class="bir-form-text">{{
+            others_date.strftime('%d') }}</div>
+        <div style="left: 4.72in; top: 9.55in; letter-spacing: 0.14in;" class="bir-form-text">{{
+            others_date.strftime('%Y') }}</div>
+        {% endif %}
+        <!-- payment details amount, these are put inside table to allow right align -->
+        <table class="bir-form-text table-data" style="width: 2.90in; left: 5.44in; top: 9.49in;" cell-spacing="0">
+            <tbody>
+                <tr>
+                    <td style="text-align: right; padding: 0; letter-spacing: 0.15in; height: 0.23in;"
+                        class="bir-form-amount">
+                        {{ "{:.2f}".format(others_amount) }}
+                    </td>
+                </tr>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<div>
+    {% if is_local_dev() %}
+    <img src="https://raw.githubusercontent.com/mincerray1/phbir/master/phbir/public/img/forms/0619-F Jan 2018 rev final-1.png"
+        height="auto" width="100%" style="position: absolute; top: 0; left: 0; z-index: -1;">
+    {% else %}
+    <img src="/assets/aruga_acct/img/forms/0619-F Jan 2018 rev final-1.png" height="auto" width="100%"
+        style="position: absolute; top: 0; left: 0; z-index: -1;">
+    {% endif %}
+</div>

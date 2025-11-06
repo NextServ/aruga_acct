@@ -44,6 +44,12 @@ app_license = "mit"
 
 # include js in doctype views
 # doctype_js = {"doctype" : "public/js/doctype.js"}
+doctype_js = {
+    "Purchase Invoice" : "public/js/purchase_invoice.js",
+    "Sales Invoice" : "public/js/sales_invoice.js",
+    "Payment Entry" : "public/js/payment_entry.js",
+    "Expense Claim" : "public/js/expense_claim.js"
+}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -137,13 +143,35 @@ app_license = "mit"
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-# 	}
-# }
+doc_events = {
+    "Sales Invoice": {
+        "validate": "aruga_acct.aruga_accounting.doc_events.sales_invoice_validate",
+    },
+    "Purchase Invoice": {
+        "validate": "aruga_acct.aruga_accounting.doc_events.purchase_invoice_validate",
+    },
+    "Payment Entry": {
+        "validate": "aruga_acct.aruga_accounting.doc_events.payment_entry_validate",
+    },
+}
+
+
+jenv = {
+	"methods": [
+		"is_local_dev:aruga_acct.aruga_accounting.utils.is_local_dev",
+		"preformat_tin:aruga_acct.aruga_accounting.utils.preformat_tin",
+		"preformat_tin_with_dash:aruga_acct.aruga_accounting.utils.preformat_tin_with_dash"
+	]
+}
+
+#v14
+jinja = {
+	"methods": [
+		"aruga_acct.aruga_accounting.utils.is_local_dev",
+		"aruga_acct.aruga_accounting.utils.preformat_tin",
+		"aruga_acct.aruga_accounting.utils.preformat_tin_with_dash"
+	]
+}
 
 # Scheduled Tasks
 # ---------------
@@ -242,3 +270,23 @@ app_license = "mit"
 # 	"Logging DocType Name": 30  # days to retain logs
 # }
 
+fixtures = [
+    {
+        "dt": "Letter Head", "filters": [
+            [
+                "name", "in", [
+                    "BOA Letterhead"
+                ]
+            ]
+        ]
+    },
+    {
+        "dt": "PH Tax Type Code"
+    },
+    {
+        "dt": "ATC"
+    },
+    {
+        "dt": "VAT Industry"
+    }
+]

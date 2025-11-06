@@ -1,0 +1,112 @@
+<h2 class="text-center">{%= __("Inventory Book") %}</h2>
+<!-- erpnext.get_currency(frappe.defaults.get_default("company")) -->
+{% let currency = erpnext.get_currency(filters.company) %}
+
+{% let company_information = get_company_information(filters.company) %}
+<h6 class="text-left">
+    <div>
+        <span>Company:</span>
+        <span class="">{%= filters.company %}</span>
+        <span></span>
+    </div>
+    <div>
+        <span>Address: </span>
+        <span class="">{%= company_information.address %}</span>
+    </div>
+    <div>
+        <span>TIN: </span>
+        <span class="">{%= company_information.tin %}</span>
+    </div>
+    <div>
+        <span>Permit No: </span>
+        <span class="">{%= company_information.permit_no %}</span>
+    </div>
+    <div>
+        <span>Date of Permit: </span>
+        <span class="">{%= (company_information.permit_date_issued != '' ? frappe.datetime.str_to_user(company_information.permit_date_issued) : '') %}</span>
+    </div>
+    <div>
+        <span>Taxable Year: </span>
+        <span class="">{%= (new Date(filters.as_at_date)).getFullYear() %}</span>
+    </div>
+    <div>
+        <span>Report: </span>
+        <span class="">{%= __("Inventory Book") %}</span>
+    </div>
+
+    {% let no_of_records = 0 %}
+    {% for(var i=0, l=data.length; i<l; i++) { %}
+        {% if(!data[i].is_total_row && !data[i].is_subtotal_row) { %}
+            {% no_of_records = no_of_records + 1 %}
+        {% } %}
+    {% } %}
+    <div>
+        <span>No of Records: </span>
+        <span class="">{%= no_of_records %}</span>
+    </div>
+    
+    <div>
+        <span>{%= __("As at Date: ") %}</span>        
+        <span>
+            {%= frappe.datetime.str_to_user(filters.as_at_date) %}
+        </span>
+    </div>
+    <div>
+        <span>Software Name & Version: </span>
+        <span class="">ERPNext v{%= company_information.erpnext_version %}</span>
+    </div>
+    <div>
+        <span>Printed On: </span>
+        <span class="">{%= frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) %}</span>
+    </div>
+    <div>
+        <span>Printed By: </span>
+        <span class="">{%= frappe.session.user %}</span>
+    </div>
+</h6>
+
+<hr>
+<table class="table table-bordered" style="font-size: 0.8em">
+	<thead>
+		<tr>
+			<th style="width: 8%">{%= __("Date") %}</th>
+			<th style="width: 12%">{%= __("Item Code") %}</th>
+            <th style="width: 15%">{%= __("Item Name") %}</th>
+            
+            <th style="width: 15%">{%= __("Unit") %}</th>
+			<th style="width: 10%">{%= __("Price per Unit") %}</th>
+			<th style="width: 10%">{%= __("Amount") %}</th>
+		</tr>
+	</thead>
+	<tbody>
+        {% let total_amount = 0 %}
+        
+		{% for(var i=0, l=data.length; i<l; i++) { %}
+            {% if(!data[i].is_total_row) { %}
+			    <tr>
+                    <td>{%= frappe.datetime.str_to_user(data[i].max_posting_date) %}</td>
+                    <td>{%= data[i].name %}</td>
+                    <td>{%= data[i].item_name %}</td>
+
+                    <td style="text-align: right">{%= data[i].actual_qty.toFixed(2) %}</td>
+                    <td style="text-align: right">{%= format_currency(data[i].price_per_unit, currency) %}</td>
+                    <td style="text-align: right">{%= format_currency(data[i].amount, currency) %}</td>
+
+                    {% total_amount = total_amount + data[i].amount %}
+                </tr>
+            {% } %}
+		{% } %}
+    </tbody>
+    <tfoot>
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td style="text-align: right"><strong>Grand Total</strong></td>
+            <td style="text-align: right"><strong>{%= format_currency(total_amount, currency) %}</strong></td>
+        </tr>
+    </tfoot>
+</table>
+
+<p class="text-right text-muted">Printed On {%= frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) %}</p>

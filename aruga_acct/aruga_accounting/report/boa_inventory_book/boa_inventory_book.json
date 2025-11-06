@@ -1,0 +1,31 @@
+{
+  "add_total_row": 0,
+  "columns": [],
+  "creation": "2021-08-15 19:51:55.412566",
+  "disable_prepared_report": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "idx": 0,
+  "is_standard": "Yes",
+  "json": "{}",
+  "letter_head": "",
+  "modified": "2021-08-15 19:52:11.571451",
+  "modified_by": "Administrator",
+  "module": "Aruga Accounting",
+  "name": "BOA Inventory Book",
+  "owner": "Administrator",
+  "prepared_report": 0,
+  "ref_doctype": "Stock Ledger Entry",
+  "report_name": "BOA Inventory Book",
+  "report_type": "Script Report",
+  "roles": [
+    {
+      "role": "Stock User"
+    },
+    {
+      "role": "Accounts Manager"
+    }
+  ]
+}

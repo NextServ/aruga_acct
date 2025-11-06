@@ -1,0 +1,181 @@
+<style>
+    .print-format {
+        font-family: 'Courier New', monospace;
+        font-size: 0.80em;
+        width: 8.5in;
+        min-height: 14in;
+
+        margin-top: 0mm;
+        margin-left: 0mm;
+        margin-right: 0mm;
+        margin-bottom: 0mm;
+
+        padding-top: 0mm;
+        padding-left: 0mm;
+        padding-right: 0mm;
+        margin-bottom: 0mm;
+    }
+
+    .bir-form-text {
+        font-size: 0.80em;
+        width: 100%;
+        position: absolute;
+    }
+
+    .bir-form-text-footer {
+        font-size: 0.80em;
+        position: absolute;
+        text-align: center:
+    }
+
+    .bir-form-amount {
+        text-align: right;
+    }
+
+    .bir-form-data {
+        font-size: 0.80em;
+    }
+
+    table.table-data {
+        left: 0.44in;
+        top: 4.81in;
+    }
+
+    table.table-data {
+        padding-right: 0;
+        text-align: right;
+    }
+
+    table.table-data tr {
+        height: 0.24in;
+    }
+
+    table.table-data td {
+        overflow: hidden;
+        display: inline-block;
+        white-space: nowrap;
+        height: 0.24in;
+    }
+</style>
+<div style="left: 0.50in; top: 1.78in; letter-spacing: 0.12in;" class="bir-form-text">{{ year }}</div>
+
+<!-- quarter -->
+{% set left_quarter = 1.67 + (0.61 * (quarter - 1)) %}
+<div style="left: {{ left_quarter }}in; top: 1.78in;" class="bir-form-text">✗</div>
+
+<div style="left: 3.30in; top: 2.28in; letter-spacing: 0.12in;" class="bir-form-text">{{ company.tin[:3] }}</div>
+<div style="left: 4.09in; top: 2.28in; letter-spacing: 0.12in;" class="bir-form-text">{{ company.tin[3:6] }}</div>
+<div style="left: 4.88in; top: 2.28in; letter-spacing: 0.12in;" class="bir-form-text">{{ company.tin[6:9] }}</div>
+<div style="left: 5.67in; top: 2.28in; letter-spacing: 0.12in;" class="bir-form-text">{{ company.tin[9:12] }}</div>
+
+
+<div style="left: 7.70in; top: 2.28in; letter-spacing: 0.12in;" class="bir-form-text">{{ company.rdo_code[:3] }}</div>
+
+<div style="left: 0.43in; top: 2.68in; letter-spacing: 0.12in" class="bir-form-text">{{ company.company_name.upper() }}
+</div>
+
+<div style="left: 0.43in; top: 3.07in; letter-spacing: 0.11in;" class="bir-form-text">{{ company.address.upper() }}
+</div>
+<div style="left: 7.48in; top: 3.36in; letter-spacing: 0.12in;" class="bir-form-text">{{ company.zipcode[:4] }}</div>
+
+<div style="left: 1.55in; top: 3.63in; letter-spacing: 0.11in;" class="bir-form-text">{{ company.phone }}</div>
+
+{% if company.withholding_agent_category == 'Government' %}
+<div style="left: 7.25in; top: 3.68in; letter-spacing: 0.11in;" class="bir-form-text">✗</div>
+{% else %}
+<div style="left: 6.25in; top: 3.68in; letter-spacing: 0.11in;" class="bir-form-text">✗</div>
+{% endif %}
+
+<div style="left: 1.62in; top: 3.88in; letter-spacing: 0.11in;" class="bir-form-text">{{ company.email_id.upper() }}
+</div>
+
+<div class="bir-form-data">
+    <table class="bir-form-text table-data" cell-spacing="0">
+        <tbody>
+            {% for entry in data %}
+            <tr>
+                <td style="text-align: left; padding: 0;">
+                    <div
+                        style="display: inline-table; width: 0.91in; text-align: left; letter-spacing: 0.12in; margin-left: 1px;">
+                        {{ entry.atc }}
+                    </div>
+                    <div
+                        style="display: inline-table; width: 3.03in; text-align: right; letter-spacing: 0.14in; margin-left: 0px;">
+                        {{ "{:.2f}".format(entry.base_tax_base) }}
+                    </div>
+                    <div
+                        style="display: inline-table; width: 0.80in; text-align: center; letter-spacing: 0.14in; margin-left: -6px;">
+                        {{ "{:,.1f}".format(entry.tax_rate) }}
+                    </div>
+                    <div
+                        style="display: inline-table; width: 2.93in; text-align: right; letter-spacing: 0.14in; margin-left: 3px;">
+                        {{ "{:,.2f}".format(entry.base_tax_withheld) }}
+                    </div>
+                </td>
+                <!-- <td style="text-align: right; width: 2.00in; letter-spacing: 0.14in;">
+                        {{ "{:.2f}".format(entry.base_tax_base) }}
+                    </td>
+                    <td style="text-align: center; width: 0.8in;">
+                        {{ "{:,.2f}%".format(entry.tax_rate) }}
+                    </td>
+                    <td style="text-align: right; width: 2.70in; letter-spacing: 0.14in;">
+                        {{ "{:,.2f}".format(entry.base_tax_withheld) }}
+                    </td> -->
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <table class="bir-form-text table-data" style="left: 5.44in; top: 6.44in; width: 2.88in;">
+        <tfoot>
+            <tr style="">
+                <td style="text-align: right; letter-spacing: 0.14in;">{{ "{:.2f}".format(total_taxes_withheld) }}</td>
+            </tr>
+        </tfoot>
+    </table>
+    <table class="bir-form-text table-data" style="left: 5.44in; top: 8.07in; width: 2.88in;">
+        <tfoot>
+            <tr style="">
+                <td style="text-align: right; letter-spacing: 0.14in;">{{ "{:.2f}".format(total_remittances_made) }}
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+    <table class="bir-form-text table-data" style="left: 5.44in; top: 8.35in; width: 2.88in;">
+        <tfoot>
+            <tr style="">
+                <td style="text-align: right; letter-spacing: 0.14in;">{{ "{:.2f}".format(tax_still_due) }}</td>
+            </tr>
+        </tfoot>
+    </table>
+    <table class="bir-form-text table-data" style="left: 5.44in; top: 9.44in; width: 2.88in;">
+        <tfoot>
+            <tr style="">
+                <td style="text-align: right; letter-spacing: 0.14in;">{{ "{:.2f}".format(total_penalties) }}</td>
+            </tr>
+        </tfoot>
+    </table>
+    <table class="bir-form-text table-data" style="left: 5.44in; top: 9.72in; width: 2.88in;">
+        <tfoot>
+            <tr style="">
+                <td style="text-align: right; letter-spacing: 0.14in;">{{ "{:.2f}".format(total_amount_still_due) }}
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+
+<div style="left: 4.30in; top: 10.54in; width: 3.90in; text-align: center; font-size: 0.7em;"
+    class="bir-form-text-footer">
+    <span>{{ company.authorized_representative_1 }}{{ " / " + company.title_1 if company.title_1 }}{{ " / " +
+        preformat_tin_with_dash(company.tin_of_signatory_1) if company.tin_of_signatory_1 }}</span>
+</div>
+
+<div>
+    {% if is_local_dev() %}
+    <img src="https://raw.githubusercontent.com/mincerray1/phbir/master/phbir/public/img/forms/1601-FQ 2020 final-1.png"
+        height="100%" width="100%" style="position: absolute; top: 0; left: 0; z-index: -1;">
+    {% else %}
+    <img src="/assets/aruga_acct/img/forms/1601-FQ 2020 final-1.png" height="100%" width="100%"
+        style="position: absolute; top: 0; left: 0; z-index: -1;">
+    {% endif %}
+</div>

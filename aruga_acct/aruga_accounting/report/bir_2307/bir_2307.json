@@ -1,0 +1,39 @@
+{
+  "add_total_row": 0,
+  "columns": [],
+  "creation": "2021-08-17 17:06:24.361684",
+  "disable_prepared_report": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "idx": 0,
+  "is_standard": "Yes",
+  "letter_head": "BOA Letterhead",
+  "modified": "2021-08-19 01:52:20.155959",
+  "modified_by": "Administrator",
+  "module": "Aruga Accounting",
+  "name": "BIR 2307",
+  "owner": "Administrator",
+  "prepared_report": 0,
+  "ref_doctype": "Purchase Invoice",
+  "report_name": "BIR 2307",
+  "report_type": "Script Report",
+  "roles": [
+    {
+      "role": "Accounts User"
+    },
+    {
+      "role": "Purchase User"
+    },
+    {
+      "role": "Accounts Manager"
+    },
+    {
+      "role": "Auditor"
+    },
+    {
+      "role": "System Manager"
+    }
+  ]
+}

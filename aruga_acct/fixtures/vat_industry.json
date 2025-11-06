@@ -1,0 +1,426 @@
+[
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:17.895234",
+  "name": "Insurance and Pension Funding",
+  "title": "Insurance and Pension Funding"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:18.146884",
+  "name": "Activities Auxiliary to Financial Intermediation",
+  "title": "Activities Auxiliary to Financial Intermediation"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:18.176213",
+  "name": "Construction",
+  "title": "Construction"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:18.194798",
+  "name": "Water Transport",
+  "title": "Water Transport"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:18.212868",
+  "name": "Hotels and Restaurants",
+  "title": "Hotels and Restaurants"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:18.230449",
+  "name": "Land Transport",
+  "title": "Land Transport"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:18.251968",
+  "name": "Manufacture and Repair of Furniture",
+  "title": "Manufacture and Repair of Furniture"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:18.271837",
+  "name": "Manufacture of Basic Metals",
+  "title": "Manufacture of Basic Metals"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:18.289109",
+  "name": "Manufacture of Chemicals and Chemical Products",
+  "title": "Manufacture of Chemicals and Chemical Products"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:18.304877",
+  "name": "Manufacture of Coke, Refined Petroleum & Fuel Products",
+  "title": "Manufacture of Coke, Refined Petroleum & Fuel Products"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:18.327846",
+  "name": "Manufacture of Electrical Machinery & Apparatus N.E.C.",
+  "title": "Manufacture of Electrical Machinery & Apparatus N.E.C."
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:18.351994",
+  "name": "Manufacture of Fabricated Metal Products",
+  "title": "Manufacture of Fabricated Metal Products"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:18.375336",
+  "name": "Manufacture of Food, Products & Beverages",
+  "title": "Manufacture of Food, Products & Beverages"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:18.393684",
+  "name": "Manufacture of Machinery & Equipment NEC",
+  "title": "Manufacture of Machinery & Equipment NEC"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:18.412873",
+  "name": "Manufacture of Medical, Precision, Optical Instruments",
+  "title": "Manufacture of Medical, Precision, Optical Instruments"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:18.427759",
+  "name": "Manufacture of Motor Vehicles, Trailer & Semi-Trailers",
+  "title": "Manufacture of Motor Vehicles, Trailer & Semi-Trailers"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:18.445361",
+  "name": "Manufacture of Office, Accounting & Computing Machinery",
+  "title": "Manufacture of Office, Accounting & Computing Machinery"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:18.464767",
+  "name": "Manufacture of Other Non-Metallic Mineral Products",
+  "title": "Manufacture of Other Non-Metallic Mineral Products"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:18.480049",
+  "name": "Manufacture of Other Transport Equipment",
+  "title": "Manufacture of Other Transport Equipment"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:18.495012",
+  "name": "Manufacture of Other Wearing Apparel",
+  "title": "Manufacture of Other Wearing Apparel"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:18.510353",
+  "name": "Manufacture of Paper and Paper Products",
+  "title": "Manufacture of Paper and Paper Products"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:18.526781",
+  "name": "Manufacture of Radio, TV & Communication Equipment/ Apparatus",
+  "title": "Manufacture of Radio, TV & Communication Equipment/ Apparatus"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:18.543783",
+  "name": "Manufacture of Rubber & Plastic Products",
+  "title": "Manufacture of Rubber & Plastic Products"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:18.563505",
+  "name": "Manufacture of Textiles",
+  "title": "Manufacture of Textiles"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:18.594383",
+  "name": "Manufacture of Tobacco Products",
+  "title": "Manufacture of Tobacco Products"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:18.701403",
+  "name": "Manufacture of Wood & Wood Products",
+  "title": "Manufacture of Wood & Wood Products"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:18.924936",
+  "name": "Manufacturing N.E.C.",
+  "title": "Manufacturing N.E.C."
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:19.076522",
+  "name": "Metallic Ore Mining",
+  "title": "Metallic Ore Mining"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:19.441830",
+  "name": "Non-Metallic Mining & Quarrying",
+  "title": "Non-Metallic Mining & Quarrying"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:19.686085",
+  "name": "Retail Sale",
+  "title": "Retail Sale"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:19.953853",
+  "name": "Wholesale Trade and Commission Trade",
+  "title": "Wholesale Trade and Commission Trade"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:20.197654",
+  "name": "Sale, Maintenance, Repair of Motor Vehicle, Sale of Automotive Fuel",
+  "title": "Sale, Maintenance, Repair of Motor Vehicle, Sale of Automotive Fuel"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:20.385056",
+  "name": "Collection, Purification and Distribution of Water",
+  "title": "Collection, Purification and Distribution of Water"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:20.744036",
+  "name": "Computer and Related Activities",
+  "title": "Computer and Related Activities"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:20.957409",
+  "name": "Real Estate Activities",
+  "title": "Real Estate Activities"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:21.039537",
+  "name": "Air Transport",
+  "title": "Air Transport"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:21.100228",
+  "name": "Electricity, Gas, Steam & Hot Water Supply",
+  "title": "Electricity, Gas, Steam & Hot Water Supply"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:21.139318",
+  "name": "Postal & Telecommunications",
+  "title": "Postal & Telecommunications"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:21.168634",
+  "name": "Publishing, Printing & Reproduction of Recorded Media",
+  "title": "Publishing, Printing & Reproduction of Recorded Media"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:21.194507",
+  "name": "Recreational, Cultural & Sporting Activities",
+  "title": "Recreational, Cultural & Sporting Activities"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:21.221610",
+  "name": "Recycling",
+  "title": "Recycling"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:21.247086",
+  "name": "Renting of Goods & Equipment",
+  "title": "Renting of Goods & Equipment"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:21.270852",
+  "name": "Supporting & Auxiliary Transport Services",
+  "title": "Supporting & Auxiliary Transport Services"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:21.297030",
+  "name": "Activities of Membership Organizations, Inc.",
+  "title": "Activities of Membership Organizations, Inc."
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:21.326972",
+  "name": "Health and Social Work",
+  "title": "Health and Social Work"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:21.347410",
+  "name": "Public Admin & Defense Compulsory Social Security",
+  "title": "Public Admin & Defense Compulsory Social Security"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:21.364594",
+  "name": "Research and Development",
+  "title": "Research and Development"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:21.382297",
+  "name": "Agricultural, Hunting, and Forestry",
+  "title": "Agricultural, Hunting, and Forestry"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:21.401073",
+  "name": "Farming of Animals",
+  "title": "Farming of Animals"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:21.419996",
+  "name": "Fishing",
+  "title": "Fishing"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:21.441011",
+  "name": "Other Service Activities",
+  "title": "Other Service Activities"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:21.461656",
+  "name": "Miscellaneous Business Activities",
+  "title": "Miscellaneous Business Activities"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "VAT Industry",
+  "modified": "2021-08-19 19:11:21.483482",
+  "name": "Unclassified",
+  "title": "Unclassified"
+ }
+]

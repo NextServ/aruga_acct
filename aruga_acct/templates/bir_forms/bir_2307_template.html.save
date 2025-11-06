@@ -1,0 +1,49 @@
+<style>
+.print-format {
+    font-family: monospace;
+    width: 8.5in;
+    min-height: 13in;
+    
+    margin-top: 0mm;
+    margin-left: 0mm;
+    margin-right: 0mm;
+    margin-bottom: 0mm;
+    
+    padding-top: 0mm;
+    padding-left: 0mm;
+    padding-right: 0mm;
+    padding-bottom: 0mm;
+
+    width: 100%;
+    background-image: url('/assets/aruga_acct/img/forms/2307-1.png');
+    background-repeat: no-repeat;
+    background-position: bottom;
+    background-size: cover;
+    background-color: rgba(255, 255, 255, .2);
+}
+
+/*.main-content {
+    background-image: url('/assets/aruga_acct/img/forms/2307-1.png');
+    
+    background-repeat: no-repeat;
+    height: 100%;
+    background-size: cover;
+}*/
+@media print {
+        .new-page {
+          page-break-before: always;
+        }
+      }
+</style>
+<span style="top: 3.5in; left: 3.92in; position: absolute;">{%= payor_tin_s
+<!-- <img src="/assets/aruga_acct/img/forms/2307-1.png" height="100%" width="100%"> -->
+<!-- <img src="/assets/aruga_acct/img/forms/2307-1.png" height="100%" width="100%">
+<img src="/files/company_logo.png" height="100%" width="100%"> -->
+
+<div>
+    <img src="/assets/aruga_acct/img/forms/2307-1.png" height="100%" width="100%" style="position: absolute; top: 0; left: 0; z-index: -1;">
+</div>
+
+<div class="new-page">
+    <img src="/assets/aruga_acct/img/forms/2307-2.png" height="100%" width="100%" style="position: absolute; top: 13in; left: 0; z-index: -1;">
+</div>

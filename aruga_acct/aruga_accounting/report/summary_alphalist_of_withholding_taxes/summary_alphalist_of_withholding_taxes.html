@@ -1,0 +1,69 @@
+<!-- erpnext.get_currency(frappe.defaults.get_default("company")) -->
+{% let company_information = get_company_information(filters.company) %}
+<!-- {% let currency = erpnext.get_currency(filters.company) %} -->
+{% const options = {minimumFractionDigits: 2, maximumFractionDigits: 2 } %}
+
+<div>
+    <div style="font-weight: bold;">Bureau of Internal Revenue</div>
+    <div style="font-weight: bold;">Summary Alphalist of Withholding Taxes (SAWT)</div>
+    <div>
+        <strong>For the month of:</strong> {%= moment.months(filters.month - 1) %} {%= filters.year %}
+    </div>
+
+    <div style="width: 100%;">
+        <span style="width: 50%;"><span style="font-weight: bold;">Payee's Name:</span> {%= company_information.registered_name %}</span>
+    </div>
+    <div><span style="font-weight: bold;">TIN:</span> {%= company_information.tin_with_dash.substring(0, 11) %}</div>
+    
+    <br />
+    <table>
+        <thead>
+            <tr>
+                <th>Seq. No</th>
+                <th>TIN</th>
+                <th>Corporation</th>
+                <th>Individual</th>
+                <th>ATC Code</th>
+                <th>Nature of Payment</th>
+                <th style= "text-align: right;">Amount of Income Payment</th>
+                <th style= "text-align: right;">Tax Rate</th>
+                <th style= "text-align: right;">Amount of Tax Withheld</th>
+            </tr>
+        </thead>
+        <tbody>        
+            {% let sum_income_payment = 0, sum_tax_withheld = 0 %}
+
+            {% for(var i=0, l=data.length; i<l; i++) { %}
+                {% if(!data[i].is_total_row) { %}
+                    <tr>
+                        <td>{%= (i + 1) %}</td>
+                        <td>{%= data[i].tin_with_dash %}</td>
+                        <td>{%= data[i].registered_name.toUpperCase() %}</td>
+                        <td>{%= data[i].individual.toUpperCase() %}</td>
+                        <td>{%= data[i].atc %}</td>
+                        <td>{%= data[i].description %}</td>
+                        <td style= "text-align: right;">{%= Number(data[i].income_payment).toLocaleString('en', options) %}</td>
+                        <td style= "text-align: right;">{%= Number(data[i].atc_rate).toLocaleString('en', options) %}</td>
+                        <td style= "text-align: right;">{%= Number(data[i].tax_withheld).toLocaleString('en', options) %}</td>
+                        
+                        {% sum_income_payment = sum_income_payment + data[i].income_payment %}
+                        {% sum_tax_withheld = sum_tax_withheld + data[i].tax_withheld %}
+                    </tr>
+                {% } %}
+            {% } %}
+        </tbody>
+        <tfoot>
+            <tr style="border-top: 1px solid black; border-bottom: double black;">
+                <td><strong>Grand Total</strong></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td style="text-align: right; font-weight: bold;">{%= Number(sum_income_payment).toLocaleString('en', options) %}</td>
+                <td style="text-align: right; font-weight: bold;"></td>
+                <td style="text-align: right; font-weight: bold;">{%= Number(sum_tax_withheld).toLocaleString('en', options) %}</td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
