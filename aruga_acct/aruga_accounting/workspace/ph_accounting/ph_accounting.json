@@ -13,16 +13,7 @@
  "is_hidden": 0,
  "label": "PH Accounting",
  "links": [
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "PH Localization Company Setup",
-   "link_count": 0,
-   "link_to": "PH Localization Company Setup",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
+
   {
    "hidden": 0,
    "is_query_report": 0,
@@ -103,7 +94,7 @@
   },
   {
    "hidden": 0,
-   "is_query_report": 0,
+   "is_query_report": 1,
    "label": "BOA Purchase Journal",
    "link_count": 0,
    "link_to": "BOA Purchase Journal",
@@ -114,7 +105,7 @@
   },
   {
    "hidden": 0,
-   "is_query_report": 0,
+   "is_query_report": 1,
    "label": "BOA Inventory Book",
    "link_count": 0,
    "link_to": "BOA Inventory Book",
@@ -125,7 +116,7 @@
   },
   {
    "hidden": 0,
-   "is_query_report": 0,
+   "is_query_report": 1,
    "label": "BOA General Journal",
    "link_count": 0,
    "link_to": "BOA General Journal",
@@ -136,7 +127,7 @@
   },
   {
    "hidden": 0,
-   "is_query_report": 0,
+   "is_query_report": 1,
    "label": "BOA Cash Receipts Journal",
    "link_count": 0,
    "link_to": "BOA Cash Receipts Journal",
@@ -147,7 +138,7 @@
   },
   {
    "hidden": 0,
-   "is_query_report": 0,
+   "is_query_report": 1,
    "label": "BOA Cash Disbursements Journal",
    "link_count": 0,
    "link_to": "BOA Cash Disbursements Journal",
@@ -158,7 +149,7 @@
   },
   {
    "hidden": 0,
-   "is_query_report": 0,
+   "is_query_report": 1,
    "label": "BOA General Journal",
    "link_count": 0,
    "link_to": "BOA General Journal",
@@ -188,7 +179,7 @@
   },
   {
    "hidden": 0,
-   "is_query_report": 0,
+   "is_query_report": 1,
    "label": "BIR 2306",
    "link_count": 0,
    "link_to": "BIR 2306",
@@ -199,7 +190,7 @@
   },
   {
    "hidden": 0,
-   "is_query_report": 0,
+   "is_query_report": 1,
    "label": "BIR 2550M",
    "link_count": 0,
    "link_to": "BIR 2550M",
@@ -210,7 +201,7 @@
   },
   {
    "hidden": 0,
-   "is_query_report": 0,
+   "is_query_report": 1,
    "label": "BIR 2550Q",
    "link_count": 0,
    "link_to": "BIR 2550Q",
@@ -221,7 +212,7 @@
   },
   {
    "hidden": 0,
-   "is_query_report": 0,
+   "is_query_report": 1,
    "label": "BIR 1601-EQ",
    "link_count": 0,
    "link_to": "BIR 1601-EQ",
@@ -232,7 +223,7 @@
   },
   {
    "hidden": 0,
-   "is_query_report": 0,
+   "is_query_report": 1,
    "label": "BIR 1601-FQ",
    "link_count": 0,
    "link_to": "BIR 1601-FQ",
@@ -243,7 +234,7 @@
   },
   {
    "hidden": 0,
-   "is_query_report": 0,
+   "is_query_report": 1,
    "label": "BIR 0619-E",
    "link_count": 0,
    "link_to": "BIR 0619-E",
@@ -254,8 +245,8 @@
   },
   {
    "hidden": 0,
-   "is_query_report": 0,
-   "label": "BIR 0619-f",
+   "is_query_report": 1,
+   "label": "BIR 0619-F",
    "link_count": 0,
    "link_to": "BIR 0619-F",
    "link_type": "Report",
@@ -284,7 +275,7 @@
   },
   {
    "hidden": 0,
-   "is_query_report": 0,
+   "is_query_report": 1,
    "label": "RELIEF Summary List of Purchases",
    "link_count": 0,
    "link_to": "RELIEF Summary List of Purchases",
@@ -295,7 +286,7 @@
   },
   {
    "hidden": 0,
-   "is_query_report": 0,
+   "is_query_report": 1,
    "label": "RELIEF Summary List of Sales",
    "link_count": 0,
    "link_to": "RELIEF Summary List of Sales",
@@ -306,7 +297,7 @@
   },
   {
    "hidden": 0,
-   "is_query_report": 0,
+   "is_query_report": 1,
    "label": "EWT Report",
    "link_count": 0,
    "link_to": "EWT Report",
@@ -317,7 +308,7 @@
   },
   {
    "hidden": 0,
-   "is_query_report": 0,
+   "is_query_report": 1,
    "label": "VAT Sales Invoice Report",
    "link_count": 0,
    "link_to": "VAT Sales Invoice Report",
@@ -328,7 +319,7 @@
   },
   {
    "hidden": 0,
-   "is_query_report": 0,
+   "is_query_report": 1,
    "label": "VAT Purchase Invoice Report",
    "link_count": 0,
    "link_to": "VAT Purchase Invoice Report",
