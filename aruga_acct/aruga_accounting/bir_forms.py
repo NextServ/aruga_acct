@@ -3,7 +3,7 @@ from frappe import _
 from frappe.utils.pdf import get_pdf
 from frappe.utils import getdate, flt, cint, add_days, add_months, cstr, get_datetime, nowdate, today
 from datetime import datetime
-from aruga_acct.aruga_accounting.utils import get_company_information, get_supplier_information, get_employee_information, report_is_permitted
+from aruga_acct.aruga_accounting.utils import get_company_information, get_supplier_information, get_employee_information, report_is_permitted, get_bir_form_images
 import pytz
 import json
 
@@ -99,6 +99,7 @@ def bir_2307(company, supplier, employee, doctype, purchase_invoice, payment_ent
     filename = "BIR 2307 {} {} {} {}".format(company, supplier, from_date, to_date)
     
     context["build_version"] = frappe.utils.get_build_version()
+    context["bir_form_images"] = get_bir_form_images("2307-1.png")
     html = frappe.render_template("templates/bir_forms/bir_2307_template.html", context)
     options["page-size"] = "Legal"
 
@@ -501,6 +502,7 @@ def bir_2550m(company, year, month,
     filename = "BIR 2550M {} {} {}".format(company, year, month)
     
     context["build_version"] = frappe.utils.get_build_version()
+    context["bir_form_images"] = get_bir_form_images("bir2550m-1.png", "bir2550m-2.png")
     html = frappe.render_template("templates/bir_forms/bir_2550m_template.html", context)
     options["page-size"] = "Legal"
 
@@ -617,6 +619,7 @@ def bir_1601_eq(company, year, quarter, response_type="pdf"):
     filename = "BIR 1601-EQ {} {} {}".format(company, year, quarter)
     
     context["build_version"] = frappe.utils.get_build_version()
+    context["bir_form_images"] = get_bir_form_images("1601-EQ January 2019 ENCS final-1.png")
     html = frappe.render_template("templates/bir_forms/bir_1601_eq_template.html", context)
     options["page-size"] = "Legal"
 
@@ -922,6 +925,7 @@ def bir_1601_fq(company, year, quarter, response_type="pdf"):
     filename = "BIR 1601-FQ {} {} {}".format(company, year, quarter)
     
     context["build_version"] = frappe.utils.get_build_version()
+    context["bir_form_images"] = get_bir_form_images("1601-FQ 2020 final-1.png")
     html = frappe.render_template("templates/bir_forms/bir_1601_fq_template.html", context)
     options["page-size"] = "Legal"
 
@@ -1166,6 +1170,7 @@ def bir_0619_e(company, year, month, due_date, amended_form, any_taxes_withheld,
     filename = "BIR 0619-E {} {} {}".format(company, year, month)
     
     context["build_version"] = frappe.utils.get_build_version()
+    context["bir_form_images"] = get_bir_form_images("0619-E Jan 2018 rev final-1.png")
     html = frappe.render_template("templates/bir_forms/bir_0619_e_template.html", context)
     options["page-size"] = "Letter"
 
@@ -1221,6 +1226,7 @@ def bir_0619_f(company, year, month, due_date, amended_form, any_taxes_withheld,
     filename = "BIR 0619-F {} {} {}".format(company, year, month)
     
     context["build_version"] = frappe.utils.get_build_version()
+    context["bir_form_images"] = get_bir_form_images("0619-F Jan 2018 rev final-1.png")
     html = frappe.render_template("templates/bir_forms/bir_0619_f_template.html", context)
     options["page-size"] = "Letter"
 

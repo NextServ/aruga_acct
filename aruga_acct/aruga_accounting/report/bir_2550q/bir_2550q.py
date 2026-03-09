@@ -4,7 +4,7 @@
 import frappe
 from frappe.utils import getdate, flt, cint
 from datetime import datetime
-from aruga_acct.aruga_accounting.utils import get_company_information, report_is_permitted
+from aruga_acct.aruga_accounting.utils import get_company_information, report_is_permitted, get_bir_form_images
 from aruga_acct.aruga_accounting.bir_forms import return_pdf_document, first_month_in_quarter
 from frappe import _
 import json
@@ -456,6 +456,7 @@ def bir_2550q(company, year, quarter,
     filename = "BIR 2550Q {} {} {}".format(company, year, quarter)
     
     context["build_version"] = frappe.utils.get_build_version()
+    context["bir_form_images"] = get_bir_form_images("2550Q-1.png", "2550Q-2.png", "2550Q-3.png")
     html = frappe.render_template("templates/bir_forms/bir_2550q_template.html", context)
     options["page-size"] = "Legal"
 

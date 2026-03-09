@@ -4,6 +4,8 @@ from frappe import _
 from erpnext import __version__
 import json
 import re
+import base64
+import os
 
 @frappe.whitelist()
 def get_custom_formatted_address(address):
@@ -375,6 +377,18 @@ def is_local_dev():
     # ence.local:8002 (has local port = True)
     # erpnextsandbox.serviotech.com (no local port = False)
     return len(frappe.utils.get_host_name().split(':')) == 2
+
+def get_bir_form_image_data_uri(image_filename):
+    """Read a PNG file from public/img/forms/ and return a base64 data URI string."""
+    app_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    image_path = os.path.join(app_path, "public", "img", "forms", image_filename)
+    with open(image_path, "rb") as f:
+        encoded = base64.b64encode(f.read()).decode("utf-8")
+    return "data:image/png;base64," + encoded
+
+def get_bir_form_images(*image_filenames):
+    """Return a dict mapping each image filename to its base64 data URI."""
+    return {filename: get_bir_form_image_data_uri(filename) for filename in image_filenames}
 
 @frappe.whitelist()
 def generate_company_tax_templates(company):

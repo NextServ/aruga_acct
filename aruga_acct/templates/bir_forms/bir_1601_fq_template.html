@@ -171,11 +171,6 @@
 </div>
 
 <div>
-    {% if is_local_dev() %}
-    <img src="https://raw.githubusercontent.com/mincerray1/phbir/master/phbir/public/img/forms/1601-FQ 2020 final-1.png"
-        height="100%" width="100%" style="position: absolute; top: 0; left: 0; z-index: -1;">
-    {% else %}
-    <img src="/assets/aruga_acct/img/forms/1601-FQ 2020 final-1.png" height="100%" width="100%"
+    <img src="{{ bir_form_images['1601-FQ 2020 final-1.png'] }}" height="100%" width="100%"
         style="position: absolute; top: 0; left: 0; z-index: -1;">
-    {% endif %}
 </div>

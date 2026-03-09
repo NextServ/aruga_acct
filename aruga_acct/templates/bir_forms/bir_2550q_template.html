@@ -317,19 +317,10 @@
 </div>
 
 <div>
-    {% if is_local_dev() %}
-    <img src="https://raw.githubusercontent.com/mincerray1/phbir/master/phbir/public/img/forms/2550Q-1.png"
-        height="100%" width="100%" style="position: absolute; top: 0; left: 0; z-index: -1;">
-    <img src="https://raw.githubusercontent.com/mincerray1/phbir/master/phbir/public/img/forms/2550Q-2.png"
-        height="100%" width="100%" style="position: absolute; top: 14.00in; left: 0; z-index: -1;">
-    <img src="https://raw.githubusercontent.com/mincerray1/phbir/master/phbir/public/img/forms/2550Q-3.png"
-        height="100%" width="100%" style="position: absolute; top: 28.00in; left: 0; z-index: -1;">
-    {% else %}
-    <img src="/assets/aruga_acct/img/forms/2550Q-1.png" height="100%" width="100%"
+    <img src="{{ bir_form_images['2550Q-1.png'] }}" height="100%" width="100%"
         style="position: absolute; top: 0; left: 0; z-index: -1;">
-    <img src="/assets/aruga_acct/img/forms/2550Q-2.png" height="100%" width="100%"
+    <img src="{{ bir_form_images['2550Q-2.png'] }}" height="100%" width="100%"
         style="position: absolute; top: 14.00in; left: 0; z-index: -1;">
-    <img src="/assets/aruga_acct/img/forms/2550Q-3.png" height="100%" width="100%"
+    <img src="{{ bir_form_images['2550Q-3.png'] }}" height="100%" width="100%"
         style="position: absolute; top: 28.00in; left: 0; z-index: -1;">
-    {% endif %}
 </div>

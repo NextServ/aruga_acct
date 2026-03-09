@@ -4,7 +4,7 @@
 import frappe
 from frappe.utils import (getdate)
 from aruga_acct.aruga_accounting.bir_forms import return_pdf_document
-from aruga_acct.aruga_accounting.utils import get_company_information, get_supplier_information, report_is_permitted
+from aruga_acct.aruga_accounting.utils import get_company_information, get_supplier_information, report_is_permitted, get_bir_form_images
 from frappe import _
 
 options = {
@@ -187,6 +187,7 @@ def bir_2306(company, supplier, doctype, purchase_invoice, payment_entry, from_d
     filename = "BIR 2306 {} {} {} {}".format(company, supplier, from_date, to_date)
     
     context["build_version"] = frappe.utils.get_build_version()
+    context["bir_form_images"] = get_bir_form_images("2306 Jan 2018 ENCS v3 Annex A-1.png")
     html = frappe.render_template("templates/bir_forms/bir_2306_template.html", context)
     options["page-size"] = "Legal"
 
