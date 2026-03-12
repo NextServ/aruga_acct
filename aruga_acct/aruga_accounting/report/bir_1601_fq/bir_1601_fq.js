@@ -31,6 +31,15 @@ frappe.query_reports["BIR 1601-FQ"] = {
     ],
     "onload": function (report) {
         report.page.add_inner_button(__("Print BIR 1601-FQ"), function () {
+            if (!frappe.query_report.data || frappe.query_report.data.length === 0) {
+                frappe.msgprint({
+                    title: __('No Data'),
+                    indicator: 'orange',
+                    message: __('No data available for the selected filters. Please adjust your filters and try again.')
+                });
+                return;
+            }
+
             let filter_values = {
                 'company': frappe.query_report.get_filter_value('company'),
                 'year': frappe.query_report.get_filter_value('year'),

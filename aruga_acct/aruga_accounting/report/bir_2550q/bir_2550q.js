@@ -32,6 +32,14 @@ frappe.query_reports["BIR 2550Q"] = {
 	],
 	"onload": function(report) {
 		report.page.add_inner_button(__("Print BIR 2550Q"), function() {
+            if (!frappe.query_report.data || frappe.query_report.data.length === 0) {
+                frappe.msgprint({
+                    title: __('No Data'),
+                    indicator: 'orange',
+                    message: __('No data available for the selected filters. Please adjust your filters and try again.')
+                });
+                return;
+            }
 
             let d = new frappe.ui.Dialog({
                 title: 'Enter details',

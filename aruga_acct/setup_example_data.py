@@ -809,15 +809,14 @@ def create_purchase_invoices():
     base_date = add_months(today(), -2)
     quarter_start = getdate(base_date).replace(day=1)
 
-    # Get some ATC codes for the taxes
-    atc_ewt_goods = "WC010"  # Purchase of goods - 1%
-    atc_ewt_services = "WC100"  # Purchase of services - 2%
-    atc_professional = "WI010"  # Professional fees - 5%
+    # ATC codes for withholding taxes
+    atc_ewt_goods = "WC120"       # Income payments to certain contractors - 1%
+    atc_ewt_services = "WC120"    # Income payments to certain contractors - 2%
+    atc_professional = "WC010"    # Professional fees - 5%/10%
 
     # Verify these ATCs exist
-    for atc_code in [atc_ewt_goods, atc_ewt_services, atc_professional]:
+    for atc_code in set([atc_ewt_goods, atc_ewt_services, atc_professional]):
         if not frappe.db.exists("ATC", atc_code):
-            # Find any existing ATC as fallback
             existing_atc = frappe.get_all("ATC", filters={"form_type": "2307"}, limit=1, pluck="name")
             if existing_atc:
                 print(f"  ⚠ ATC {atc_code} not found, using {existing_atc[0]} as fallback")
@@ -834,9 +833,9 @@ def create_purchase_invoices():
                 {"category": "Total", "add_deduct_tax": "Add", "charge_type": "On Net Total",
                  "account_head": f"Input VAT - {COMPANY_ABBR}", "rate": 12, "description": "Input VAT 12%"},
                 {"category": "Total", "add_deduct_tax": "Deduct", "charge_type": "On Net Total",
-                 "account_head": f"EWT Payable - {COMPANY_ABBR}", "rate": 1, "description": "EWT 1%"},
+                 "account_head": f"EWT Payable - {COMPANY_ABBR}", "rate": 1, "description": "EWT 1%",
+                 "atc": atc_ewt_goods},
             ],
-            "atc": atc_ewt_goods,
             "description": "Domestic Goods Purchase with EWT 1%",
         },
         {
@@ -850,9 +849,9 @@ def create_purchase_invoices():
                 {"category": "Total", "add_deduct_tax": "Add", "charge_type": "On Net Total",
                  "account_head": f"Input VAT - {COMPANY_ABBR}", "rate": 12, "description": "Input VAT 12%"},
                 {"category": "Total", "add_deduct_tax": "Deduct", "charge_type": "On Net Total",
-                 "account_head": f"EWT Payable - {COMPANY_ABBR}", "rate": 2, "description": "EWT 2%"},
+                 "account_head": f"EWT Payable - {COMPANY_ABBR}", "rate": 2, "description": "EWT 2%",
+                 "atc": atc_ewt_services},
             ],
-            "atc": atc_ewt_services,
             "description": "Service Purchase with EWT 2%",
         },
         {
@@ -866,9 +865,9 @@ def create_purchase_invoices():
                 {"category": "Total", "add_deduct_tax": "Add", "charge_type": "On Net Total",
                  "account_head": f"Input VAT - {COMPANY_ABBR}", "rate": 12, "description": "Input VAT 12%"},
                 {"category": "Total", "add_deduct_tax": "Deduct", "charge_type": "On Net Total",
-                 "account_head": f"EWT Payable - {COMPANY_ABBR}", "rate": 5, "description": "EWT 5% Professional"},
+                 "account_head": f"EWT Payable - {COMPANY_ABBR}", "rate": 5, "description": "EWT 5% Professional",
+                 "atc": atc_professional},
             ],
-            "atc": atc_professional,
             "description": "Professional Fees with EWT 5%",
         },
         {
@@ -882,9 +881,9 @@ def create_purchase_invoices():
                 {"category": "Total", "add_deduct_tax": "Add", "charge_type": "On Net Total",
                  "account_head": f"Input VAT - {COMPANY_ABBR}", "rate": 12, "description": "Input VAT 12%"},
                 {"category": "Total", "add_deduct_tax": "Deduct", "charge_type": "On Net Total",
-                 "account_head": f"EWT Payable - {COMPANY_ABBR}", "rate": 5, "description": "EWT 5% Professional"},
+                 "account_head": f"EWT Payable - {COMPANY_ABBR}", "rate": 5, "description": "EWT 5% Professional",
+                 "atc": atc_professional},
             ],
-            "atc": atc_professional,
             "description": "Freelancer Fees with EWT 5%",
         },
         {
@@ -898,7 +897,6 @@ def create_purchase_invoices():
                 {"category": "Total", "add_deduct_tax": "Add", "charge_type": "On Net Total",
                  "account_head": f"Input VAT - {COMPANY_ABBR}", "rate": 12, "description": "Input VAT 12%"},
             ],
-            "atc": None,
             "description": "Capital Goods - Equipment",
         },
         {
@@ -912,7 +910,6 @@ def create_purchase_invoices():
                 {"category": "Total", "add_deduct_tax": "Add", "charge_type": "On Net Total",
                  "account_head": f"Input VAT - {COMPANY_ABBR}", "rate": 0, "description": "VAT Exempt"},
             ],
-            "atc": None,
             "description": "Exempt Purchase",
         },
     ]
@@ -953,13 +950,6 @@ def create_purchase_invoices():
             "update_stock": 0,
         })
         pi.insert()
-
-        # Set ATC on tax rows if applicable
-        if inv_data.get("atc") and frappe.db.exists("ATC", inv_data["atc"]):
-            for tax_row in pi.taxes:
-                if "EWT" in (tax_row.description or "") or "Withholding" in (tax_row.description or ""):
-                    frappe.db.set_value("Purchase Taxes and Charges", tax_row.name, "atc", inv_data["atc"])
-
         pi.submit()
         print(f"  → Created & submitted PI: {pi.name} ({inv_data['description']}) = ₱{pi.grand_total:,.2f}")
 
