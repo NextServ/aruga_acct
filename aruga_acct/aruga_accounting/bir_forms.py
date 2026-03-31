@@ -239,7 +239,7 @@ def bir_2550m(company, year, month,
     pi_base_tax_amounts = frappe.db.sql("""
         SELECT
             pi.name,
-            ptac.base_tax_amount,
+            CASE WHEN pi.is_return = 1 THEN -ptac.base_tax_amount ELSE ptac.base_tax_amount END AS base_tax_amount,
             ptac.item_wise_tax_detail
         FROM
             `tabPurchase Invoice` pi
@@ -285,7 +285,7 @@ def bir_2550m(company, year, month,
     si_base_tax_amounts = frappe.db.sql("""
         SELECT
             si.name,
-            stac.base_tax_amount,
+            CASE WHEN si.is_return = 1 THEN -stac.base_tax_amount ELSE stac.base_tax_amount END AS base_tax_amount,
             stac.item_wise_tax_detail
         FROM
             `tabSales Invoice` si
