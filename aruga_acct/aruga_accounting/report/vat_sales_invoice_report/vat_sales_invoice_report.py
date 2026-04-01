@@ -180,6 +180,20 @@ def get_data(filters):
 
     # Apply VAT and EWT logic
     for row in result:
+        sign = -1 if row.get("is_return") else 1
+        for key in (
+            "total",
+            "net_discount",
+            "tax_amount",
+            "withholding_tax_amount",
+            "invoice_amount",
+            "non_vat",
+            "sales_with_vat",
+            "with_ewt",
+            "without_ewt",
+        ):
+            if row.get(key) is not None:
+                row[key] = row[key] * sign
         # For Cancelled invoices, set all monetary fields to None
         if row['status'] == 'Cancelled':
             row['total'] = None

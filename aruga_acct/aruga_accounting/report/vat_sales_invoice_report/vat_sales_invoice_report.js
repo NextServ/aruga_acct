@@ -44,9 +44,9 @@ frappe.query_reports["VAT Sales Invoice Report"] = {
         },
         {
             "fieldname": "exclude_credit_notes",
-            "label": __("Exclude Credit Note"),
+            "label": __("Exclude Credit/Debit Notes"),
             "fieldtype": "Check",
-            "default": 1
+            "default": 0
         },
     ]
 }
