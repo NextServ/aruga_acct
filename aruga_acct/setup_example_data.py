@@ -59,10 +59,21 @@ def setup():
 # ── 1. Company ────────────────────────────────────────────────
 def setup_company():
     print("\n[1/11] Setting up Company...")
-    company = frappe.get_doc("Company", COMPANY)
+    # Ensure Company exists; create if missing
+    if frappe.db.exists("Company", COMPANY):
+        company = frappe.get_doc("Company", COMPANY)
+    else:
+        company = frappe.get_doc({
+            "doctype": "Company",
+            "company_name": COMPANY,
+            "abbr": COMPANY_ABBR,
+            "default_currency": CURRENCY,
+        })
+        company.insert()
+        print(f"  → Created Company: {COMPANY}")
 
     # Set TIN (Tax Identification Number)
-    if not company.tax_id:
+    if not getattr(company, 'tax_id', None):
         company.tax_id = "123-456-789-000"
         company.save()
         print("  → Set company TIN: 123-456-789-000")
