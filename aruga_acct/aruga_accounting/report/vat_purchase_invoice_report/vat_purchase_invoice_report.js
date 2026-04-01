@@ -44,9 +44,9 @@ frappe.query_reports["VAT Purchase Invoice Report"] = {
         },
         {
             "fieldname": "exclude_debit_notes",
-            "label": __("Exclude Credit Note"),
+            "label": __("Exclude Debit Note / Returns"),
             "fieldtype": "Check",
-            "default": 1
+            "default": 0
         },
     ]
 }
