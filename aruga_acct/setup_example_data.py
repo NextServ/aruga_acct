@@ -19,6 +19,7 @@ This creates all the sample data you need to test:
 import frappe
 from frappe.utils import today, add_days, add_months, getdate, nowdate
 from erpnext.setup.utils import enable_all_roles_and_domains
+from frappe.custom.doctype.custom_field.custom_field import create_custom_field
 
 
 COMPANY = "ARUGA"
@@ -41,6 +42,7 @@ def setup():
     create_item_tax_templates()
     setup_ph_localization()
     setup_tax_declaration()
+    ensure_custom_fields()
     create_customers()
     create_suppliers()
     create_items()
@@ -456,9 +458,42 @@ def setup_tax_declaration():
         print(f"  → Tax Declaration already exists for {COMPANY}")
 
 
-# ── 7. Customers ─────────────────────────────────────────────
+# ── 7. Custom Fields ─────────────────────────────────────────
+def ensure_custom_fields():
+    print("\n[7/12] Ensuring custom fields for Purchase Invoice...")
+
+    # Manual Doc No
+    if not frappe.db.exists("Custom Field", {"dt": "Purchase Invoice", "fieldname": "custom_manual_doc_no"}):
+        create_custom_field("Purchase Invoice", {
+            "label": "Manual Doc No.",
+            "fieldname": "custom_manual_doc_no",
+            "fieldtype": "Data",
+            "insert_after": "title",
+            "reqd": 0,
+            "translatable": 0,
+        })
+        print("  → Added custom field: Purchase Invoice.custom_manual_doc_no")
+    else:
+        print("  → Custom field exists: Purchase Invoice.custom_manual_doc_no")
+
+    # Branch
+    if not frappe.db.exists("Custom Field", {"dt": "Purchase Invoice", "fieldname": "branch"}):
+        create_custom_field("Purchase Invoice", {
+            "label": "Branch",
+            "fieldname": "branch",
+            "fieldtype": "Data",
+            "insert_after": "custom_manual_doc_no",
+            "reqd": 0,
+            "translatable": 0,
+        })
+        print("  → Added custom field: Purchase Invoice.branch")
+    else:
+        print("  → Custom field exists: Purchase Invoice.branch")
+
+
+# ── 8. Customers ─────────────────────────────────────────────
 def create_customers():
-    print("\n[7/11] Creating customers...")
+    print("\n[8/12] Creating customers...")
 
     customers = [
         {
@@ -550,9 +585,9 @@ def create_customers():
             print(f"  → Customer exists: {cust_data['customer_name']}")
 
 
-# ── 8. Suppliers ──────────────────────────────────────────────
+# ── 9. Suppliers ──────────────────────────────────────────────
 def create_suppliers():
-    print("\n[8/11] Creating suppliers...")
+    print("\n[9/12] Creating suppliers...")
 
     suppliers = [
         {
@@ -656,9 +691,9 @@ def create_suppliers():
             print(f"  → Supplier exists: {supp_data['supplier_name']}")
 
 
-# ── 9. Items ─────────────────────────────────────────────────
+# ── 10. Items ─────────────────────────────────────────────────
 def create_items():
-    print("\n[9/11] Creating items...")
+    print("\n[10/12] Creating items...")
 
     items = [
         # Sales items
@@ -707,9 +742,9 @@ def create_items():
             print(f"  → Item exists: {item_data['item_code']}")
 
 
-# ── 10. Sales Invoices ────────────────────────────────────────
+# ── 11. Sales Invoices ────────────────────────────────────────
 def create_sales_invoices():
-    print("\n[10/11] Creating sales invoices...")
+    print("\n[11/12] Creating sales invoices...")
 
     base_date = add_months(today(), -2)  # 2 months ago for quarterly testing
     quarter_start = getdate(base_date).replace(day=1)
@@ -813,20 +848,26 @@ def create_sales_invoices():
         print(f"  → Created & submitted SI: {si.name} ({inv_data['description']}) = ₱{si.grand_total:,.2f}")
 
 
-# ── 11. Purchase Invoices ─────────────────────────────────────
+# ── 12. Purchase Invoices ─────────────────────────────────────
 def create_purchase_invoices():
-    print("\n[11/11] Creating purchase invoices...")
+    print("\n[12/12] Creating purchase invoices...")
 
     base_date = add_months(today(), -2)
     quarter_start = getdate(base_date).replace(day=1)
 
-    # ATC codes for withholding taxes
-    atc_ewt_goods = "WC120"       # Income payments to certain contractors - 1%
-    atc_ewt_services = "WC120"    # Income payments to certain contractors - 2%
-    atc_professional = "WC010"    # Professional fees - 5%/10%
+    # ATC codes for withholding taxes (cover all target codes for testing)
+    atc_codes = {
+        "goods_1": "WV010",
+        "services_2": "WC158",
+        "services_5": "WC160",
+        "contractors": "WC120",
+        "services_1": "WC157",
+        "services_4": "WV020",
+        "others": "WC640",
+    }
 
     # Verify these ATCs exist
-    for atc_code in set([atc_ewt_goods, atc_ewt_services, atc_professional]):
+    for atc_code in set(atc_codes.values()):
         if not frappe.db.exists("ATC", atc_code):
             existing_atc = frappe.get_all("ATC", filters={"form_type": "2307"}, limit=1, pluck="name")
             if existing_atc:
@@ -837,6 +878,8 @@ def create_purchase_invoices():
             "supplier": "Manila Office Supplies Co.",
             "posting_date": str(add_days(quarter_start, 5)),
             "taxes_and_charges": f"Domestic Purchase of Goods - VAT - {COMPANY_ABBR}",
+            "manual_doc_no": "MDN-001",
+            "branch": "MAIN",
             "items": [
                 {"item_code": "PURCH-001", "qty": 1, "rate": 15000},
             ],
@@ -845,14 +888,16 @@ def create_purchase_invoices():
                  "account_head": f"Input VAT - {COMPANY_ABBR}", "rate": 12, "description": "Input VAT 12%"},
                 {"category": "Total", "add_deduct_tax": "Deduct", "charge_type": "On Net Total",
                  "account_head": f"EWT Payable - {COMPANY_ABBR}", "rate": 1, "description": "EWT 1%",
-                 "atc": atc_ewt_goods},
+                 "atc": atc_codes["goods_1"]},
             ],
-            "description": "Domestic Goods Purchase with EWT 1%",
+            "description": "EWT WV010 (1%) Goods",
         },
         {
             "supplier": "PH Tech Solutions Inc.",
             "posting_date": str(add_days(quarter_start, 12)),
             "taxes_and_charges": f"Domestic Purchase of Services - VAT - {COMPANY_ABBR}",
+            "manual_doc_no": "MDN-002",
+            "branch": "MAIN",
             "items": [
                 {"item_code": "SVC-003", "qty": 6, "rate": 10000},
             ],
@@ -861,14 +906,16 @@ def create_purchase_invoices():
                  "account_head": f"Input VAT - {COMPANY_ABBR}", "rate": 12, "description": "Input VAT 12%"},
                 {"category": "Total", "add_deduct_tax": "Deduct", "charge_type": "On Net Total",
                  "account_head": f"EWT Payable - {COMPANY_ABBR}", "rate": 2, "description": "EWT 2%",
-                 "atc": atc_ewt_services},
+                 "atc": atc_codes["services_2"]},
             ],
-            "description": "Service Purchase with EWT 2%",
+            "description": "EWT WC158 (2%) Services",
         },
         {
             "supplier": "CPA Associates",
             "posting_date": str(add_days(quarter_start, 18)),
             "taxes_and_charges": f"Professional Fees - EWT 5% - {COMPANY_ABBR}",
+            "manual_doc_no": "MDN-003",
+            "branch": "NORTH",
             "items": [
                 {"item_code": "PURCH-002", "qty": 1, "rate": 50000},
             ],
@@ -877,14 +924,16 @@ def create_purchase_invoices():
                  "account_head": f"Input VAT - {COMPANY_ABBR}", "rate": 12, "description": "Input VAT 12%"},
                 {"category": "Total", "add_deduct_tax": "Deduct", "charge_type": "On Net Total",
                  "account_head": f"EWT Payable - {COMPANY_ABBR}", "rate": 5, "description": "EWT 5% Professional",
-                 "atc": atc_professional},
+                 "atc": atc_codes["services_5"]},
             ],
-            "description": "Professional Fees with EWT 5%",
+            "description": "EWT WC160 (5%) Professional",
         },
         {
             "supplier": "Juan Reyes (Freelancer)",
             "posting_date": str(add_days(quarter_start, 25)),
             "taxes_and_charges": f"Professional Fees - EWT 5% - {COMPANY_ABBR}",
+            "manual_doc_no": "MDN-004",
+            "branch": "SOUTH",
             "items": [
                 {"item_code": "PURCH-004", "qty": 1, "rate": 35000},
             ],
@@ -892,36 +941,64 @@ def create_purchase_invoices():
                 {"category": "Total", "add_deduct_tax": "Add", "charge_type": "On Net Total",
                  "account_head": f"Input VAT - {COMPANY_ABBR}", "rate": 12, "description": "Input VAT 12%"},
                 {"category": "Total", "add_deduct_tax": "Deduct", "charge_type": "On Net Total",
-                 "account_head": f"EWT Payable - {COMPANY_ABBR}", "rate": 5, "description": "EWT 5% Professional",
-                 "atc": atc_professional},
+                 "account_head": f"EWT Payable - {COMPANY_ABBR}", "rate": 1, "description": "EWT 1% Services",
+                 "atc": atc_codes["services_1"]},
             ],
-            "description": "Freelancer Fees with EWT 5%",
+            "description": "EWT WC157 (1%) Services",
         },
         {
-            "supplier": "Global Imports Ltd.",
-            "posting_date": str(add_days(quarter_start, 35)),
-            "taxes_and_charges": f"Capital Goods - VAT - {COMPANY_ABBR}",
+            "supplier": "PH Tech Solutions Inc.",
+            "posting_date": str(add_days(quarter_start, 30)),
+            "taxes_and_charges": f"Domestic Purchase of Services - VAT - {COMPANY_ABBR}",
+            "manual_doc_no": "MDN-005",
+            "branch": "WEST",
             "items": [
-                {"item_code": "PURCH-003", "qty": 10, "rate": 12000},
+                {"item_code": "SVC-003", "qty": 4, "rate": 12000},
             ],
             "taxes": [
                 {"category": "Total", "add_deduct_tax": "Add", "charge_type": "On Net Total",
                  "account_head": f"Input VAT - {COMPANY_ABBR}", "rate": 12, "description": "Input VAT 12%"},
+                {"category": "Total", "add_deduct_tax": "Deduct", "charge_type": "On Net Total",
+                 "account_head": f"EWT Payable - {COMPANY_ABBR}", "rate": 4, "description": "EWT 4%",
+                 "atc": atc_codes["services_4"]},
             ],
-            "description": "Capital Goods - Equipment",
+            "description": "EWT WV020 (4%) Services",
+        },
+        {
+            "supplier": "Global Imports Ltd.",
+            "posting_date": str(add_days(quarter_start, 35)),
+            "taxes_and_charges": f"Domestic Purchase of Services - VAT - {COMPANY_ABBR}",
+            "manual_doc_no": "MDN-006",
+            "branch": "EAST",
+            "items": [
+                {"item_code": "PURCH-003", "qty": 2, "rate": 60000},
+            ],
+            "taxes": [
+                {"category": "Total", "add_deduct_tax": "Add", "charge_type": "On Net Total",
+                 "account_head": f"Input VAT - {COMPANY_ABBR}", "rate": 12, "description": "Input VAT 12%"},
+                {"category": "Total", "add_deduct_tax": "Deduct", "charge_type": "On Net Total",
+                 "account_head": f"EWT Payable - {COMPANY_ABBR}", "rate": 1.5, "description": "EWT 1.5%",
+                 "atc": atc_codes["contractors"]},
+            ],
+            "description": "EWT WC120 (1.5%) Contractors",
         },
         {
             "supplier": "Manila Office Supplies Co.",
             "posting_date": str(add_days(quarter_start, 40)),
-            "taxes_and_charges": f"Exempt Purchase - {COMPANY_ABBR}",
+            "taxes_and_charges": f"Domestic Purchase of Goods - VAT - {COMPANY_ABBR}",
+            "manual_doc_no": "MDN-007",
+            "branch": "HUB",
             "items": [
-                {"item_code": "PURCH-001", "qty": 1, "rate": 5000},
+                {"item_code": "PURCH-001", "qty": 3, "rate": 8000},
             ],
             "taxes": [
                 {"category": "Total", "add_deduct_tax": "Add", "charge_type": "On Net Total",
-                 "account_head": f"Input VAT - {COMPANY_ABBR}", "rate": 0, "description": "VAT Exempt"},
+                 "account_head": f"Input VAT - {COMPANY_ABBR}", "rate": 12, "description": "Input VAT 12%"},
+                {"category": "Total", "add_deduct_tax": "Deduct", "charge_type": "On Net Total",
+                 "account_head": f"EWT Payable - {COMPANY_ABBR}", "rate": 1, "description": "EWT 1%",
+                 "atc": atc_codes["others"]},
             ],
-            "description": "Exempt Purchase",
+            "description": "EWT WC640 (1%) Other",
         },
     ]
 
@@ -959,6 +1036,8 @@ def create_purchase_invoices():
             "credit_to": f"Creditors - {COMPANY_ABBR}",
             "currency": CURRENCY,
             "update_stock": 0,
+            "custom_manual_doc_no": inv_data.get("manual_doc_no", ""),
+            "branch": inv_data.get("branch", ""),
         })
         pi.insert()
         pi.submit()
