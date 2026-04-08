@@ -30,7 +30,7 @@ frappe.query_reports["EWT Report"] = {
         },
         {
             "fieldname": "exclude_credit_notes",
-            "label": "Exclude Credit Notes",
+            "label": "Exclude Debit Notes",
             "fieldtype": "Check",
             "default": 1
         }
