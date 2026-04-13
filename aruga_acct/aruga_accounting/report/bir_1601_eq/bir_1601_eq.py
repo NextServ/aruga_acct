@@ -34,7 +34,7 @@ def get_data(filters):
                 (
                 SELECT 
                     ptac.atc,
-                    pi.base_total,
+                    pi.base_net_total AS base_total,
                     ptac.base_tax_amount
                 FROM 
                     `tabPurchase Invoice` pi
@@ -57,7 +57,7 @@ def get_data(filters):
                 UNION ALL
                 SELECT 
                     atac.atc,
-                    pe.base_paid_amount,
+                    pe.base_paid_amount_after_tax AS base_total,
                     atac.base_tax_amount
                 FROM
                     `tabPayment Entry` pe
@@ -92,13 +92,14 @@ def get_data(filters):
 
     # Format tax_rate and add tax_still_due, total_amount_still_due for all rows
     for row in data:
+        gross_tax_base = row.get("base_tax_base") or 0
+        tax_withheld = row.get("base_tax_withheld") or 0
+        row["base_tax_base"] = gross_tax_base - tax_withheld
+
         if row.get("tax_rate") is not None:
             row["tax_rate"] = f"{int(row['tax_rate'])}%"
         else:
             row["tax_rate"] = "-"  # Handle null tax_rate
-
-        if row.get("base_tax_base") is None:
-            row["base_tax_base"] = "-"  # Handle null base_tax_base
 
         # Add tax_still_due and total_amount_still_due for non-total rows
         row["tax_still_due"] = ""
