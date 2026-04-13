@@ -84,18 +84,18 @@ def get_data(company, year, month):
             stac.item_wise_tax_detail
         FROM
             `tabSales Invoice` si
-        INNER JOIN
+        LEFT JOIN
             `tabSales Taxes and Charges` stac
         ON
             si.name = stac.parent
-        INNER JOIN
+        LEFT JOIN
             `tabAccount` a
         ON
             stac.account_head = a.name
         WHERE
             si.docstatus = 1
-            AND stac.base_tax_amount >= 0
-            AND (a.account_type in ('Tax', 'Payable', '') or a.account_type is NULL)
+            AND (stac.base_tax_amount >= 0 OR stac.base_tax_amount IS NULL)
+            AND (a.account_type in ('Tax', 'Payable', '') or a.account_type is NULL OR a.account_type IS NULL)
             AND si.company = %s
             AND YEAR(si.posting_date) = %s
             AND MONTH(si.posting_date) = %s
@@ -103,70 +103,107 @@ def get_data(company, year, month):
         
     last_day_of_the_month = '{MM}/{DD}/{YYYY}'.format(MM=('0' + str(month))[-2:],DD=calendar.monthrange(int(year), int(month))[1], YYYY=year)
 
+    # Process invoices with taxes
     for tax_line in si_base_tax_amounts:
-        item_wise_tax_detail = json.loads(tax_line.item_wise_tax_detail)
-        for item in item_wise_tax_detail.keys():
-            # loop to find net amount
-            for item_net_amount in si_base_net_amounts:                
-                if item_net_amount.name == tax_line.name and item_net_amount.item_name == item:
-                    item_tax_template = item_net_amount.item_tax_template
-                    taxes_and_charges = item_net_amount.taxes_and_charges
-                    
-                    document_row = None
-                    document_row = next((row for row in data if row.get('sales_invoice') == item_net_amount.name), None)
-                    # document_row = (row for row in data if row.get('customer') == item_net_amount.customer)
-                    if not document_row:
-                        customer_information = get_customer_information(item_net_amount.customer)
-                        document_row = {
-                            'sales_invoice': item_net_amount.name,
-                            'taxable_month': last_day_of_the_month,
-                            'customer': item_net_amount.customer,
-                            'full_name': get_formatted_full_name(customer_information['contact_last_name'], 
-                                customer_information['contact_first_name'], customer_information['contact_middle_name']),
-                            'customer_type': customer_information['customer_type'],
-                            'tin': customer_information['tin'],
-                            'branch_code': customer_information['branch_code'],
-                            'tin_with_dash': customer_information['tin_with_dash'][:11],
-                            'contact_first_name': customer_information['contact_first_name'],
-                            'contact_middle_name': customer_information['contact_middle_name'],
-                            'contact_last_name': customer_information['contact_last_name'],
-                            'address_line1': customer_information['address_line1'],
-                            'address_line2': customer_information['address_line2'],
-                            'city': customer_information['city'],
-                            'address': customer_information['address_line1']
-                                 + (" {0}".format(customer_information['address_line2']) if customer_information['address_line2'] else "")
-                                 + (" {0}".format(customer_information['city']) if customer_information['city'] else ""),
-                            'total_sales': 0,
-                            'zero_rated': 0,
-                            'exempt': 0,
-                            'gross_taxable': 0,
-                            'taxable_net': 0,
-                            'output_tax': 0,
-                        }
-
-                        data.append(document_row)
-
-                    # taxable_net, zero_rated, exempt
-                    # total_sales, gross_taxable, output_tax
-                    if tax_declaration_company_setup.item_vat_sales and item_tax_template == tax_declaration_company_setup.item_vat_sales:
-                        document_row['taxable_net'] += flt(item_net_amount.base_net_amount, 2)
-                        document_row['output_tax'] += flt(item_wise_tax_detail[item][1], 2)
-                    elif tax_declaration_company_setup.vat_sales and taxes_and_charges == tax_declaration_company_setup.vat_sales:
-                        document_row['taxable_net'] += flt(item_net_amount.base_net_amount, 2)
-                        document_row['output_tax'] += flt(item_wise_tax_detail[item][1], 2)
+        if tax_line.item_wise_tax_detail:
+            item_wise_tax_detail = json.loads(tax_line.item_wise_tax_detail)
+            for item in item_wise_tax_detail.keys():
+                # loop to find net amount
+                for item_net_amount in si_base_net_amounts:                
+                    if item_net_amount.name == tax_line.name and item_net_amount.item_name == item:
+                        item_tax_template = item_net_amount.item_tax_template
+                        taxes_and_charges = item_net_amount.taxes_and_charges
                         
-                    if tax_declaration_company_setup.item_zero_rated_sales and item_tax_template == tax_declaration_company_setup.item_zero_rated_sales:
-                        document_row['zero_rated'] += flt(item_net_amount.base_net_amount, 2)
-                    elif tax_declaration_company_setup.zero_rated_sales and taxes_and_charges == tax_declaration_company_setup.zero_rated_sales:
-                        document_row['zero_rated'] += flt(item_net_amount.base_net_amount, 2)
-                        
-                    if tax_declaration_company_setup.item_exempt_sales and item_tax_template == tax_declaration_company_setup.item_exempt_sales:
-                        document_row['exempt'] += flt(item_net_amount.base_net_amount, 2)
-                    elif tax_declaration_company_setup.exempt_sales and taxes_and_charges == tax_declaration_company_setup.exempt_sales:
-                        document_row['exempt'] += flt(item_net_amount.base_net_amount, 2)
+                        document_row = None
+                        document_row = next((row for row in data if row.get('sales_invoice') == item_net_amount.name), None)
+                        if not document_row:
+                            customer_information = get_customer_information(item_net_amount.customer)
+                            document_row = {
+                                'sales_invoice': item_net_amount.name,
+                                'taxable_month': last_day_of_the_month,
+                                'customer': item_net_amount.customer,
+                                'full_name': get_formatted_full_name(customer_information['contact_last_name'], 
+                                    customer_information['contact_first_name'], customer_information['contact_middle_name']),
+                                'customer_type': customer_information['customer_type'],
+                                'tin': customer_information['tin'],
+                                'branch_code': customer_information['branch_code'],
+                                'tin_with_dash': customer_information['tin_with_dash'][:11],
+                                'contact_first_name': customer_information['contact_first_name'],
+                                'contact_middle_name': customer_information['contact_middle_name'],
+                                'contact_last_name': customer_information['contact_last_name'],
+                                'address_line1': customer_information['address_line1'],
+                                'address_line2': customer_information['address_line2'],
+                                'city': customer_information['city'],
+                                'address': customer_information['address_line1']
+                                     + (" {0}".format(customer_information['address_line2']) if customer_information['address_line2'] else "")
+                                     + (" {0}".format(customer_information['city']) if customer_information['city'] else ""),
+                                'total_sales': 0,
+                                'zero_rated': 0,
+                                'exempt': 0,
+                                'gross_taxable': 0,
+                                'taxable_net': 0,
+                                'output_tax': 0,
+                            }
 
-                    # net amount row is found, exit loop
-                    break
+                            data.append(document_row)
+
+                        # taxable_net, zero_rated, exempt
+                        # total_sales, gross_taxable, output_tax
+                        if tax_declaration_company_setup.item_vat_sales and item_tax_template == tax_declaration_company_setup.item_vat_sales:
+                            document_row['taxable_net'] += flt(item_net_amount.base_net_amount, 2)
+                            document_row['output_tax'] += flt(item_wise_tax_detail[item][1], 2)
+                        elif tax_declaration_company_setup.vat_sales and taxes_and_charges == tax_declaration_company_setup.vat_sales:
+                            document_row['taxable_net'] += flt(item_net_amount.base_net_amount, 2)
+                            document_row['output_tax'] += flt(item_wise_tax_detail[item][1], 2)
+                            
+                        if tax_declaration_company_setup.item_zero_rated_sales and item_tax_template == tax_declaration_company_setup.item_zero_rated_sales:
+                            document_row['zero_rated'] += flt(item_net_amount.base_net_amount, 2)
+                        elif tax_declaration_company_setup.zero_rated_sales and taxes_and_charges == tax_declaration_company_setup.zero_rated_sales:
+                            document_row['zero_rated'] += flt(item_net_amount.base_net_amount, 2)
+                            
+                        if tax_declaration_company_setup.item_exempt_sales and item_tax_template == tax_declaration_company_setup.item_exempt_sales:
+                            document_row['exempt'] += flt(item_net_amount.base_net_amount, 2)
+                        elif tax_declaration_company_setup.exempt_sales and taxes_and_charges == tax_declaration_company_setup.exempt_sales:
+                            document_row['exempt'] += flt(item_net_amount.base_net_amount, 2)
+
+                        # net amount row is found, exit loop
+                        break
+    
+    # Process invoices WITHOUT taxes - default to taxable
+    for item_net_amount in si_base_net_amounts:
+        # Check if this invoice already processed (has taxes)
+        existing_row = next((row for row in data if row.get('sales_invoice') == item_net_amount.name), None)
+        if not existing_row:
+            # This invoice has no taxes, create row with items as taxable
+            customer_information = get_customer_information(item_net_amount.customer)
+            document_row = {
+                'sales_invoice': item_net_amount.name,
+                'taxable_month': last_day_of_the_month,
+                'customer': item_net_amount.customer,
+                'full_name': get_formatted_full_name(customer_information['contact_last_name'], 
+                    customer_information['contact_first_name'], customer_information['contact_middle_name']),
+                'customer_type': customer_information['customer_type'],
+                'tin': customer_information['tin'],
+                'branch_code': customer_information['branch_code'],
+                'tin_with_dash': customer_information['tin_with_dash'][:11],
+                'contact_first_name': customer_information['contact_first_name'],
+                'contact_middle_name': customer_information['contact_middle_name'],
+                'contact_last_name': customer_information['contact_last_name'],
+                'address_line1': customer_information['address_line1'],
+                'address_line2': customer_information['address_line2'],
+                'city': customer_information['city'],
+                'address': customer_information['address_line1']
+                     + (" {0}".format(customer_information['address_line2']) if customer_information['address_line2'] else "")
+                     + (" {0}".format(customer_information['city']) if customer_information['city'] else ""),
+                'total_sales': flt(item_net_amount.base_net_amount, 2),
+                'zero_rated': 0,
+                'exempt': 0,
+                'gross_taxable': flt(item_net_amount.base_net_amount, 2),
+                'taxable_net': flt(item_net_amount.base_net_amount, 2),
+                'output_tax': 0,
+            }
+            
+            data.append(document_row)
 
     for row in data:
         row['gross_taxable'] = row['taxable_net'] + row['output_tax']

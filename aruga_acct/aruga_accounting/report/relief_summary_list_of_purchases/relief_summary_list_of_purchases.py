@@ -56,18 +56,18 @@ def get_data(company, year, month):
             ptac.item_wise_tax_detail
         FROM
             `tabPurchase Invoice` pi
-        INNER JOIN
+        LEFT JOIN
             `tabPurchase Taxes and Charges` ptac
         ON
             pi.name = ptac.parent
-        INNER JOIN
+        LEFT JOIN
             `tabAccount` a
         ON
             ptac.account_head = a.name
         WHERE
             pi.docstatus = 1
-            AND ptac.base_tax_amount >= 0 AND ptac.add_deduct_tax = 'Add'
-            AND (a.account_type in ('Tax', 'Payable', '') or a.account_type is NULL)
+            AND (ptac.base_tax_amount >= 0 AND ptac.add_deduct_tax = 'Add' OR ptac.base_tax_amount IS NULL)
+            AND (a.account_type in ('Tax', 'Payable', '') or a.account_type is NULL OR a.account_type IS NULL)
             AND pi.company = %s
             AND YEAR(pi.posting_date) = %s
             AND MONTH(pi.posting_date) = %s
@@ -75,84 +75,123 @@ def get_data(company, year, month):
 
     last_day_of_the_month = '{MM}/{DD}/{YYYY}'.format(MM=('0' + str(month))[-2:],DD=calendar.monthrange(int(year), int(month))[1], YYYY=year)
 
+    # Process invoices with taxes
     for tax_line in pi_base_tax_amounts:
-        item_wise_tax_detail = json.loads(tax_line.item_wise_tax_detail)
-        for item in item_wise_tax_detail.keys():
-            # loop to find net amount
-            for item_net_amount in pi_base_net_amounts:
-                if item_net_amount.name == tax_line.name and item_net_amount.item_name == item:
-                    item_tax_template = item_net_amount.item_tax_template
-                    taxes_and_charges = item_net_amount.taxes_and_charges
-                    
-                    document_row = None
-                    document_row = next((row for row in data if row.get('purchase_invoice') == item_net_amount.name), None)
-                    # document_row = (row for row in data if row.get('supplier') == item_net_amount.supplier)
-                    if not document_row:
-                        supplier_information = get_supplier_information(item_net_amount.supplier)
-                        document_row = {
-                            'purchase_invoice': item_net_amount.name,
-                            'taxable_month': last_day_of_the_month,
-                            'supplier': item_net_amount.supplier,
-                            'full_name': get_formatted_full_name(supplier_information['contact_last_name'], 
-                                supplier_information['contact_first_name'], supplier_information['contact_middle_name']),
-                            'supplier_type': supplier_information['supplier_type'],
-                            'tin': supplier_information['tin'],
-                            'branch_code': supplier_information['branch_code'],
-                            'tin_with_dash': supplier_information['tin_with_dash'][:11],
-                            'contact_first_name': supplier_information['contact_first_name'],
-                            'contact_middle_name': supplier_information['contact_middle_name'],
-                            'contact_last_name': supplier_information['contact_last_name'],
-                            'address_line1': supplier_information['address_line1'],
-                            'address_line2': supplier_information['address_line2'],
-                            'city': supplier_information['city'],
-                            'address': supplier_information['address_line1']
-                                 + (" {0}".format(supplier_information['address_line2']) if supplier_information['address_line2'] else "")
-                                 + (" {0}".format(supplier_information['city']) if supplier_information['city'] else ""),
-                            'zero_rated': 0,
-                            'exempt': 0,
-                            'gross_taxable': 0,
-                            'services': 0,
-                            'other_than_capital_goods': 0,
-                            'capital_goods': 0,
-                            'taxable_net': 0,
-                            'input_tax': 0,
-                        }
+        if tax_line.item_wise_tax_detail:
+            item_wise_tax_detail = json.loads(tax_line.item_wise_tax_detail)
+            for item in item_wise_tax_detail.keys():
+                # loop to find net amount
+                for item_net_amount in pi_base_net_amounts:
+                    if item_net_amount.name == tax_line.name and item_net_amount.item_name == item:
+                        item_tax_template = item_net_amount.item_tax_template
+                        taxes_and_charges = item_net_amount.taxes_and_charges
+                        
+                        document_row = None
+                        document_row = next((row for row in data if row.get('purchase_invoice') == item_net_amount.name), None)
+                        if not document_row:
+                            supplier_information = get_supplier_information(item_net_amount.supplier)
+                            document_row = {
+                                'purchase_invoice': item_net_amount.name,
+                                'taxable_month': last_day_of_the_month,
+                                'supplier': item_net_amount.supplier,
+                                'full_name': get_formatted_full_name(supplier_information['contact_last_name'], 
+                                    supplier_information['contact_first_name'], supplier_information['contact_middle_name']),
+                                'supplier_type': supplier_information['supplier_type'],
+                                'tin': supplier_information['tin'],
+                                'branch_code': supplier_information['branch_code'],
+                                'tin_with_dash': supplier_information['tin_with_dash'][:11],
+                                'contact_first_name': supplier_information['contact_first_name'],
+                                'contact_middle_name': supplier_information['contact_middle_name'],
+                                'contact_last_name': supplier_information['contact_last_name'],
+                                'address_line1': supplier_information['address_line1'],
+                                'address_line2': supplier_information['address_line2'],
+                                'city': supplier_information['city'],
+                                'address': supplier_information['address_line1']
+                                     + (" {0}".format(supplier_information['address_line2']) if supplier_information['address_line2'] else "")
+                                     + (" {0}".format(supplier_information['city']) if supplier_information['city'] else ""),
+                                'zero_rated': 0,
+                                'exempt': 0,
+                                'gross_taxable': 0,
+                                'services': 0,
+                                'other_than_capital_goods': 0,
+                                'capital_goods': 0,
+                                'taxable_net': 0,
+                                'input_tax': 0,
+                            }
 
-                        data.append(document_row)
-                        
-                    if tax_declaration_company_setup.item_zero_rated_purchase and item_tax_template == tax_declaration_company_setup.item_zero_rated_purchase:
-                        document_row['zero_rated'] += flt(item_net_amount.base_net_amount, 2)
-                    elif tax_declaration_company_setup.zero_rated_purchase and taxes_and_charges == tax_declaration_company_setup.zero_rated_purchase:
-                        document_row['zero_rated'] += flt(item_net_amount.base_net_amount, 2)
-                        
-                    if tax_declaration_company_setup.item_exempt_purchase and item_tax_template == tax_declaration_company_setup.item_exempt_purchase:
-                        document_row['exempt'] += flt(item_net_amount.base_net_amount, 2)
-                    elif tax_declaration_company_setup.exempt_purchase and taxes_and_charges == tax_declaration_company_setup.exempt_purchase:
-                        document_row['exempt'] += flt(item_net_amount.base_net_amount, 2)
+                            data.append(document_row)
+                            
+                        if tax_declaration_company_setup.item_zero_rated_purchase and item_tax_template == tax_declaration_company_setup.item_zero_rated_purchase:
+                            document_row['zero_rated'] += flt(item_net_amount.base_net_amount, 2)
+                        elif tax_declaration_company_setup.zero_rated_purchase and taxes_and_charges == tax_declaration_company_setup.zero_rated_purchase:
+                            document_row['zero_rated'] += flt(item_net_amount.base_net_amount, 2)
+                            
+                        if tax_declaration_company_setup.item_exempt_purchase and item_tax_template == tax_declaration_company_setup.item_exempt_purchase:
+                            document_row['exempt'] += flt(item_net_amount.base_net_amount, 2)
+                        elif tax_declaration_company_setup.exempt_purchase and taxes_and_charges == tax_declaration_company_setup.exempt_purchase:
+                            document_row['exempt'] += flt(item_net_amount.base_net_amount, 2)
 
-                    if tax_declaration_company_setup.item_domestic_purchase_of_services and item_tax_template == tax_declaration_company_setup.item_domestic_purchase_of_services:
-                        document_row['services'] += flt(item_net_amount.base_net_amount, 2)
-                        document_row['input_tax'] += flt(item_wise_tax_detail[item][1], 2)
-                    elif tax_declaration_company_setup.domestic_purchase_of_services and taxes_and_charges == tax_declaration_company_setup.domestic_purchase_of_services:
-                        document_row['services'] += flt(item_net_amount.base_net_amount, 2)
-                        document_row['input_tax'] += flt(item_wise_tax_detail[item][1], 2)
-                        
-                    if tax_declaration_company_setup.item_domestic_purchases_of_goods and item_tax_template == tax_declaration_company_setup.item_domestic_purchases_of_goods:
-                        document_row['other_than_capital_goods'] += flt(item_net_amount.base_net_amount, 2)
-                        document_row['input_tax'] += flt(item_wise_tax_detail[item][1], 2)
-                    elif tax_declaration_company_setup.domestic_purchases_of_goods and taxes_and_charges == tax_declaration_company_setup.domestic_purchases_of_goods:
-                        document_row['other_than_capital_goods'] += flt(item_net_amount.base_net_amount, 2)
-                        document_row['input_tax'] += flt(item_wise_tax_detail[item][1], 2)
-                        
-                    if tax_declaration_company_setup.item_capital_goods and item_tax_template == tax_declaration_company_setup.item_capital_goods:
-                        document_row['capital_goods'] += flt(item_net_amount.base_net_amount, 2)
-                        document_row['input_tax'] += flt(item_wise_tax_detail[item][1], 2)
-                    elif tax_declaration_company_setup.capital_goods and taxes_and_charges == tax_declaration_company_setup.capital_goods:
-                        document_row['capital_goods'] += flt(item_net_amount.base_net_amount, 2)
-                        document_row['input_tax'] += flt(item_wise_tax_detail[item][1], 2)
+                        if tax_declaration_company_setup.item_domestic_purchase_of_services and item_tax_template == tax_declaration_company_setup.item_domestic_purchase_of_services:
+                            document_row['services'] += flt(item_net_amount.base_net_amount, 2)
+                            document_row['input_tax'] += flt(item_wise_tax_detail[item][1], 2)
+                        elif tax_declaration_company_setup.domestic_purchase_of_services and taxes_and_charges == tax_declaration_company_setup.domestic_purchase_of_services:
+                            document_row['services'] += flt(item_net_amount.base_net_amount, 2)
+                            document_row['input_tax'] += flt(item_wise_tax_detail[item][1], 2)
+                            
+                        if tax_declaration_company_setup.item_domestic_purchases_of_goods and item_tax_template == tax_declaration_company_setup.item_domestic_purchases_of_goods:
+                            document_row['other_than_capital_goods'] += flt(item_net_amount.base_net_amount, 2)
+                            document_row['input_tax'] += flt(item_wise_tax_detail[item][1], 2)
+                        elif tax_declaration_company_setup.domestic_purchases_of_goods and taxes_and_charges == tax_declaration_company_setup.domestic_purchases_of_goods:
+                            document_row['other_than_capital_goods'] += flt(item_net_amount.base_net_amount, 2)
+                            document_row['input_tax'] += flt(item_wise_tax_detail[item][1], 2)
+                            
+                        if tax_declaration_company_setup.item_capital_goods and item_tax_template == tax_declaration_company_setup.item_capital_goods:
+                            document_row['capital_goods'] += flt(item_net_amount.base_net_amount, 2)
+                            document_row['input_tax'] += flt(item_wise_tax_detail[item][1], 2)
+                        elif tax_declaration_company_setup.capital_goods and taxes_and_charges == tax_declaration_company_setup.capital_goods:
+                            document_row['capital_goods'] += flt(item_net_amount.base_net_amount, 2)
+                            document_row['input_tax'] += flt(item_wise_tax_detail[item][1], 2)
 
-                    # net amount row is found, exit loop
-                    break
+                        # net amount row is found, exit loop
+                        break
+    
+    # Process invoices WITHOUT taxes - default to taxable goods
+    for item_net_amount in pi_base_net_amounts:
+        # Check if this invoice already processed (has taxes)
+        existing_row = next((row for row in data if row.get('purchase_invoice') == item_net_amount.name), None)
+        if not existing_row:
+            # This invoice has no taxes, create row with items as other_than_capital_goods (default)
+            supplier_information = get_supplier_information(item_net_amount.supplier)
+            document_row = {
+                'purchase_invoice': item_net_amount.name,
+                'taxable_month': last_day_of_the_month,
+                'supplier': item_net_amount.supplier,
+                'full_name': get_formatted_full_name(supplier_information['contact_last_name'], 
+                    supplier_information['contact_first_name'], supplier_information['contact_middle_name']),
+                'supplier_type': supplier_information['supplier_type'],
+                'tin': supplier_information['tin'],
+                'branch_code': supplier_information['branch_code'],
+                'tin_with_dash': supplier_information['tin_with_dash'][:11],
+                'contact_first_name': supplier_information['contact_first_name'],
+                'contact_middle_name': supplier_information['contact_middle_name'],
+                'contact_last_name': supplier_information['contact_last_name'],
+                'address_line1': supplier_information['address_line1'],
+                'address_line2': supplier_information['address_line2'],
+                'city': supplier_information['city'],
+                'address': supplier_information['address_line1']
+                     + (" {0}".format(supplier_information['address_line2']) if supplier_information['address_line2'] else "")
+                     + (" {0}".format(supplier_information['city']) if supplier_information['city'] else ""),
+                'zero_rated': 0,
+                'exempt': 0,
+                'gross_taxable': flt(item_net_amount.base_net_amount, 2),
+                'services': 0,
+                'other_than_capital_goods': flt(item_net_amount.base_net_amount, 2),
+                'capital_goods': 0,
+                'taxable_net': flt(item_net_amount.base_net_amount, 2),
+                'input_tax': 0,
+            }
+            
+            data.append(document_row)
 
     for row in data:
         row['taxable_net'] = row['services'] + row['other_than_capital_goods'] + row['capital_goods']

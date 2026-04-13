@@ -50,6 +50,8 @@ def setup():
     create_sales_invoices()
     create_ewt_report_example_data()
     create_purchase_invoices()
+    create_sales_invoices_without_taxes()
+    create_purchase_invoices_without_taxes()
     create_payment_entries()
 
     frappe.db.commit()
@@ -1087,6 +1089,152 @@ def create_payment_entries():
         pe.insert()
         pe.submit()
         print(f"  → Created Payment (Pay): {pe.name} for PI {pi_data['name']} = ₱{pe.paid_amount:,.2f}")
+
+
+# ── 13. Sales Invoices WITHOUT Tax Templates ──────────────────
+def create_sales_invoices_without_taxes():
+    print("\n[13/12] Creating sales invoices WITHOUT tax templates...")
+
+    base_date = today()
+    invoices_no_tax = [
+        {
+            "customer": "ABC Trading Corporation",
+            "posting_date": str(base_date),
+            "items": [
+                {"item_code": "GOODS-001", "qty": 3, "rate": 35000},
+            ],
+            "description": "Simple Sale - No Tax Template",
+        },
+        {
+            "customer": "DEF Manufacturing Inc.",
+            "posting_date": str(add_days(base_date, 2)),
+            "items": [
+                {"item_code": "SVC-001", "qty": 20, "rate": 5000},
+            ],
+            "description": "Services - No Tax Template",
+        },
+        {
+            "customer": "GHI Export Company",
+            "posting_date": str(add_days(base_date, 5)),
+            "items": [
+                {"item_code": "GOODS-002", "qty": 2, "rate": 50000},
+                {"item_code": "SVC-002", "qty": 1, "rate": 75000},
+            ],
+            "description": "Mixed Items - No Tax Template",
+        },
+    ]
+
+    for inv_data in invoices_no_tax:
+        # Check if similar invoice already exists
+        existing = frappe.db.exists("Sales Invoice", {
+            "customer": inv_data["customer"],
+            "posting_date": inv_data["posting_date"],
+            "docstatus": ["in", [0, 1]],
+            "company": COMPANY,
+        })
+        if existing:
+            print(f"  → Sales Invoice exists for {inv_data['customer']} on {inv_data['posting_date']}")
+            continue
+
+        items = []
+        for item in inv_data["items"]:
+            items.append({
+                "item_code": item["item_code"],
+                "qty": item["qty"],
+                "rate": item["rate"],
+                "income_account": f"Sales - {COMPANY_ABBR}",
+                # NO item_tax_template - leave empty
+            })
+
+        si = frappe.get_doc({
+            "doctype": "Sales Invoice",
+            "company": COMPANY,
+            "customer": inv_data["customer"],
+            "posting_date": inv_data["posting_date"],
+            "set_posting_time": 1,
+            "due_date": add_days(inv_data["posting_date"], 30),
+            # NO taxes_and_charges - leave empty
+            "items": items,
+            "debit_to": f"Debtors - {COMPANY_ABBR}",
+            "currency": CURRENCY,
+            "update_stock": 0,
+        })
+        si.insert()
+        si.submit()
+        print(f"  → Created & submitted SI: {si.name} ({inv_data['description']}) = ₱{si.grand_total:,.2f}")
+
+
+# ── 14. Purchase Invoices WITHOUT Tax Templates ───────────────
+def create_purchase_invoices_without_taxes():
+    print("\n[14/12] Creating purchase invoices WITHOUT tax templates...")
+
+    base_date = today()
+    invoices_no_tax = [
+        {
+            "supplier": "Manila Office Supplies Co.",
+            "posting_date": str(base_date),
+            "items": [
+                {"item_code": "PURCH-001", "qty": 2, "rate": 10000},
+            ],
+            "description": "Simple Purchase - No Tax Template",
+        },
+        {
+            "supplier": "PH Tech Solutions Inc.",
+            "posting_date": str(add_days(base_date, 3)),
+            "items": [
+                {"item_code": "PURCH-002", "qty": 2, "rate": 30000},
+            ],
+            "description": "Service Purchase - No Tax Template",
+        },
+        {
+            "supplier": "Global Imports Ltd.",
+            "posting_date": str(add_days(base_date, 7)),
+            "items": [
+                {"item_code": "PURCH-003", "qty": 5, "rate": 8000},
+                {"item_code": "PURCH-005", "qty": 1, "rate": 120000},
+            ],
+            "description": "Equipment Purchase - No Tax Template",
+        },
+    ]
+
+    for inv_data in invoices_no_tax:
+        existing = frappe.db.exists("Purchase Invoice", {
+            "supplier": inv_data["supplier"],
+            "posting_date": inv_data["posting_date"],
+            "docstatus": ["in", [0, 1]],
+            "company": COMPANY,
+        })
+        if existing:
+            print(f"  → Purchase Invoice exists for {inv_data['supplier']} on {inv_data['posting_date']}")
+            continue
+
+        items = []
+        for item in inv_data["items"]:
+            items.append({
+                "item_code": item["item_code"],
+                "qty": item["qty"],
+                "rate": item["rate"],
+                "expense_account": f"Cost of Goods Sold - {COMPANY_ABBR}",
+            })
+
+        pi = frappe.get_doc({
+            "doctype": "Purchase Invoice",
+            "company": COMPANY,
+            "supplier": inv_data["supplier"],
+            "posting_date": inv_data["posting_date"],
+            "set_posting_time": 1,
+            "bill_date": inv_data["posting_date"],
+            "due_date": add_days(inv_data["posting_date"], 30),
+            # NO taxes_and_charges - leave empty
+            "items": items,
+            # NO taxes - leave empty array
+            "credit_to": f"Creditors - {COMPANY_ABBR}",
+            "currency": CURRENCY,
+            "update_stock": 0,
+        })
+        pi.insert()
+        pi.submit()
+        print(f"  → Created & submitted PI: {pi.name} ({inv_data['description']}) = ₱{pi.grand_total:,.2f}")
 
 
 if __name__ == "__main__":
