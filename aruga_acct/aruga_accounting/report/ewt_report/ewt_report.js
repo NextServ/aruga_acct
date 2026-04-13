@@ -29,7 +29,7 @@ frappe.query_reports["EWT Report"] = {
             "reqd": 1
         },
         {
-            "fieldname": "exclude_credit_notes",
+            "fieldname": "exclude_debit_notes",
             "label": "Exclude Debit Notes",
             "fieldtype": "Check",
             "default": 1

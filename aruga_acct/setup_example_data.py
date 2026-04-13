@@ -48,6 +48,7 @@ def setup():
     frappe.db.commit()  # commit setup data before creating invoices
 
     create_sales_invoices()
+    create_ewt_report_example_data()
     create_purchase_invoices()
     create_payment_entries()
 
@@ -800,6 +801,73 @@ def create_sales_invoices():
         si.insert()
         si.submit()
         print(f"  → Created & submitted SI: {si.name} ({inv_data['description']}) = ₱{si.grand_total:,.2f}")
+
+
+def create_ewt_report_example_data():
+    print("\n[10.5/11] Creating EWT report example invoice...")
+
+    posting_date = add_days(today(), -7)
+    supplier = "PH Tech Solutions Inc."
+    atc_code = "WC120"
+
+    if not frappe.db.exists("ATC", atc_code):
+        existing_atc = frappe.get_all("ATC", filters={"form_type": "2307"}, limit=1, pluck="name")
+        if existing_atc:
+            atc_code = existing_atc[0]
+            print(f"  ⚠ ATC WC120 not found, using {atc_code}")
+        else:
+            print("  ⚠ No ATC found for form type 2307; skipping EWT sample purchase invoice")
+            return
+
+    existing = frappe.db.exists("Purchase Invoice", {
+        "supplier": supplier,
+        "posting_date": posting_date,
+        "company": COMPANY,
+        "docstatus": ["in", [0, 1]],
+    })
+    if existing:
+        print(f"  → EWT sample Purchase Invoice already exists: {existing}")
+        return
+
+    pi = frappe.get_doc({
+        "doctype": "Purchase Invoice",
+        "company": COMPANY,
+        "supplier": supplier,
+        "posting_date": posting_date,
+        "set_posting_time": 1,
+        "due_date": add_days(posting_date, 30),
+        "items": [{
+            "item_code": "PURCH-002",
+            "qty": 1,
+            "rate": 100000,
+            "expense_account": f"Cost of Goods Sold - {COMPANY_ABBR}",
+        }],
+        "taxes": [
+            {
+                "category": "Total",
+                "add_deduct_tax": "Add",
+                "charge_type": "On Net Total",
+                "account_head": f"Input VAT - {COMPANY_ABBR}",
+                "rate": 12,
+                "description": "Input VAT 12%",
+            },
+            {
+                "category": "Total",
+                "add_deduct_tax": "Deduct",
+                "charge_type": "On Net Total",
+                "account_head": f"EWT Payable - {COMPANY_ABBR}",
+                "rate": 2,
+                "description": "EWT 2%",
+                "atc": atc_code,
+            },
+        ],
+        "credit_to": f"Creditors - {COMPANY_ABBR}",
+        "currency": CURRENCY,
+        "update_stock": 0,
+    })
+    pi.insert()
+    pi.submit()
+    print(f"  → Created EWT sample PI: {pi.name} (ATC {atc_code})")
 
 
 # ── 11. Purchase Invoices ─────────────────────────────────────

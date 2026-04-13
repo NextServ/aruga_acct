@@ -1,7 +1,10 @@
 import frappe
 
+
 def execute(filters=None):
-    # Step 1: Get all invoice data with ATC info (respect filter for credit notes)
+    filters = filters or {}
+
+    # Step 1: Get all purchase invoice data with ATC info (respect filter for debit notes)
     invoices, atc_usage = get_data(filters)
 
     # Step 2: Build columns dynamically based on used ATCs
@@ -12,9 +15,9 @@ def execute(filters=None):
 
 def get_columns(used_atcs):
     columns = [
-        {"label": "Customer", "fieldname": "customer", "fieldtype": "Data", "width": 180},
+        {"label": "Supplier", "fieldname": "supplier", "fieldtype": "Data", "width": 180},
         {"label": "TIN", "fieldname": "tin", "fieldtype": "Data", "width": 130},
-        {"label": "Invoice No", "fieldname": "invoice_no", "fieldtype": "Link", "options": "Sales Invoice", "width": 140},
+        {"label": "Invoice No", "fieldname": "invoice_no", "fieldtype": "Link", "options": "Purchase Invoice", "width": 140},
         {"label": "Invoice Date", "fieldname": "invoice_date", "fieldtype": "Date", "width": 110},
         {"label": "Due Date", "fieldname": "due_date", "fieldtype": "Date", "width": 110},
         {"label": "Payment Entry", "fieldname": "payment_entry", "fieldtype": "Link", "options": "Payment Entry", "width": 140},
@@ -34,31 +37,56 @@ def get_columns(used_atcs):
 
 
 def get_data(filters):
-    # Default: exclude credit notes unless checkbox is unchecked
-    exclude_credit_notes = filters.get("exclude_credit_notes")
+    # Keep backward compatibility with old filter key.
+    exclude_debit_notes = filters.get("exclude_debit_notes")
+    if exclude_debit_notes is None:
+        exclude_debit_notes = filters.get("exclude_credit_notes")
 
-    invoice_filters = {"docstatus": 1}
+    invoice_filters = {
+        "docstatus": 1,
+    }
 
-    if exclude_credit_notes:
-        invoice_filters["is_return"] = 0  # Exclude credit notes
+    if filters.get("company"):
+        invoice_filters["company"] = filters.get("company")
+
+    if filters.get("from_date"):
+        invoice_filters["posting_date"] = [">=", filters.get("from_date")]
+
+    if filters.get("to_date"):
+        existing_posting_date_filter = invoice_filters.get("posting_date")
+        if existing_posting_date_filter:
+            invoice_filters["posting_date"] = [
+                "between",
+                [filters.get("from_date"), filters.get("to_date")],
+            ]
+        else:
+            invoice_filters["posting_date"] = ["<=", filters.get("to_date")]
+
+    if exclude_debit_notes:
+        invoice_filters["is_return"] = 0  # Exclude debit notes
     # else: include all (no filter for is_return)
 
     invoices_raw = frappe.get_all(
-        "Sales Invoice",
-        fields=["name", "customer", "posting_date", "due_date", "base_grand_total"],
-        filters=invoice_filters
+        "Purchase Invoice",
+        fields=["name", "supplier", "posting_date", "due_date", "base_grand_total"],
+        filters=invoice_filters,
+        order_by="posting_date desc, name desc",
     )
 
     data = []
     used_atcs = set()  # Track only the ATCs that have non-zero or existing values
 
     for inv in invoices_raw:
-        customer_info = frappe.db.get_value("Customer", inv.customer, ["tax_id"], as_dict=True)
-        payment_entry = frappe.db.get_value("Payment Entry Reference", {"reference_name": inv.name}, "parent")
+        supplier_info = frappe.db.get_value("Supplier", inv.supplier, ["tax_id"], as_dict=True)
+        payment_entry = frappe.db.get_value(
+            "Payment Entry Reference",
+            {"reference_doctype": "Purchase Invoice", "reference_name": inv.name},
+            "parent",
+        )
 
         row = {
-            "customer": inv.customer,
-            "tin": customer_info.tax_id if customer_info else "",
+            "supplier": inv.supplier,
+            "tin": supplier_info.tax_id if supplier_info else "",
             "invoice_no": inv.name,
             "invoice_date": inv.posting_date,
             "due_date": inv.due_date,
@@ -68,7 +96,7 @@ def get_data(filters):
 
         # Fetch ATC charges (non-empty only)
         atc_items = frappe.get_all(
-            "Sales Taxes and Charges",
+            "Purchase Taxes and Charges",
             filters={"parent": inv.name},
             fields=["atc", "tax_amount"]
         )
@@ -81,4 +109,4 @@ def get_data(filters):
 
         data.append(row)
 
-    return data, used_atcs
+    return data, sorted(used_atcs)
