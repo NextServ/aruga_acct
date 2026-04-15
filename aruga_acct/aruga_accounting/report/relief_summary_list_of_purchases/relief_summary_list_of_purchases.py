@@ -9,6 +9,42 @@ from aruga_acct.aruga_accounting.bir_forms import return_document
 import json
 import calendar
 
+def get_accounts_from_purchase_template(template_name):
+    """
+    Fetch all account_head values from a Purchase Taxes and Charges Template.
+    Returns a list of account names configured in the template.
+    """
+    if not template_name:
+        return []
+    
+    try:
+        template_doc = frappe.get_doc('Purchase Taxes and Charges Template', template_name)
+        accounts = []
+        for tax_row in template_doc.taxes:
+            if hasattr(tax_row, 'account_head') and tax_row.account_head:
+                accounts.append(tax_row.account_head)
+        return accounts
+    except:
+        return []
+
+def account_matches_purchase_template(account_head, template_name):
+    """
+    Check if account_head matches a purchase template.
+    Supports:
+    1. Direct match: account_head == template_name
+    2. Template match: account_head is in the list of accounts configured in template
+    """
+    if not account_head or not template_name:
+        return False
+    
+    # Direct match fallback
+    if account_head == template_name:
+        return True
+    
+    # Check if account is in template's accounts list
+    template_accounts = get_accounts_from_purchase_template(template_name)
+    return account_head in template_accounts
+
 def execute(filters=None):
     columns, data = [], []
 
@@ -52,6 +88,7 @@ def get_data(company, year, month):
         SELECT
             pi.name,
             pi.supplier,
+            ptac.account_head,
             ptac.base_tax_amount,
             ptac.item_wise_tax_detail
         FROM
@@ -79,7 +116,11 @@ def get_data(company, year, month):
     for tax_line in pi_base_tax_amounts:
         if tax_line.item_wise_tax_detail:
             item_wise_tax_detail = json.loads(tax_line.item_wise_tax_detail)
+            account_head = tax_line.get('account_head', '')
+            
             for item in item_wise_tax_detail.keys():
+                matched = False
+                
                 # loop to find net amount
                 for item_net_amount in pi_base_net_amounts:
                     if item_net_amount.name == tax_line.name and item_net_amount.item_name == item:
@@ -120,37 +161,52 @@ def get_data(company, year, month):
                             }
 
                             data.append(document_row)
-                            
-                        if tax_declaration_company_setup.item_zero_rated_purchase and item_tax_template == tax_declaration_company_setup.item_zero_rated_purchase:
+                        
+                        # Zero Rated Purchases matching
+                        if not matched and tax_declaration_company_setup.item_zero_rated_purchase and item_tax_template == tax_declaration_company_setup.item_zero_rated_purchase:
                             document_row['zero_rated'] += flt(item_net_amount.base_net_amount, 2)
-                        elif tax_declaration_company_setup.zero_rated_purchase and taxes_and_charges == tax_declaration_company_setup.zero_rated_purchase:
+                            matched = True
+                        elif not matched and tax_declaration_company_setup.zero_rated_purchase and (taxes_and_charges == tax_declaration_company_setup.zero_rated_purchase or account_matches_purchase_template(account_head, tax_declaration_company_setup.zero_rated_purchase)):
                             document_row['zero_rated'] += flt(item_net_amount.base_net_amount, 2)
-                            
-                        if tax_declaration_company_setup.item_exempt_purchase and item_tax_template == tax_declaration_company_setup.item_exempt_purchase:
+                            matched = True
+                        
+                        # Exempt Purchases matching
+                        if not matched and tax_declaration_company_setup.item_exempt_purchase and item_tax_template == tax_declaration_company_setup.item_exempt_purchase:
                             document_row['exempt'] += flt(item_net_amount.base_net_amount, 2)
-                        elif tax_declaration_company_setup.exempt_purchase and taxes_and_charges == tax_declaration_company_setup.exempt_purchase:
+                            matched = True
+                        elif not matched and tax_declaration_company_setup.exempt_purchase and (taxes_and_charges == tax_declaration_company_setup.exempt_purchase or account_matches_purchase_template(account_head, tax_declaration_company_setup.exempt_purchase)):
                             document_row['exempt'] += flt(item_net_amount.base_net_amount, 2)
+                            matched = True
 
-                        if tax_declaration_company_setup.item_domestic_purchase_of_services and item_tax_template == tax_declaration_company_setup.item_domestic_purchase_of_services:
+                        # Services matching
+                        if not matched and tax_declaration_company_setup.item_domestic_purchase_of_services and item_tax_template == tax_declaration_company_setup.item_domestic_purchase_of_services:
                             document_row['services'] += flt(item_net_amount.base_net_amount, 2)
                             document_row['input_tax'] += flt(item_wise_tax_detail[item][1], 2)
-                        elif tax_declaration_company_setup.domestic_purchase_of_services and taxes_and_charges == tax_declaration_company_setup.domestic_purchase_of_services:
+                            matched = True
+                        elif not matched and tax_declaration_company_setup.domestic_purchase_of_services and (taxes_and_charges == tax_declaration_company_setup.domestic_purchase_of_services or account_matches_purchase_template(account_head, tax_declaration_company_setup.domestic_purchase_of_services)):
                             document_row['services'] += flt(item_net_amount.base_net_amount, 2)
                             document_row['input_tax'] += flt(item_wise_tax_detail[item][1], 2)
-                            
-                        if tax_declaration_company_setup.item_domestic_purchases_of_goods and item_tax_template == tax_declaration_company_setup.item_domestic_purchases_of_goods:
+                            matched = True
+                        
+                        # Domestic Purchases of Goods matching
+                        if not matched and tax_declaration_company_setup.item_domestic_purchases_of_goods and item_tax_template == tax_declaration_company_setup.item_domestic_purchases_of_goods:
                             document_row['other_than_capital_goods'] += flt(item_net_amount.base_net_amount, 2)
                             document_row['input_tax'] += flt(item_wise_tax_detail[item][1], 2)
-                        elif tax_declaration_company_setup.domestic_purchases_of_goods and taxes_and_charges == tax_declaration_company_setup.domestic_purchases_of_goods:
+                            matched = True
+                        elif not matched and tax_declaration_company_setup.domestic_purchases_of_goods and (taxes_and_charges == tax_declaration_company_setup.domestic_purchases_of_goods or account_matches_purchase_template(account_head, tax_declaration_company_setup.domestic_purchases_of_goods)):
                             document_row['other_than_capital_goods'] += flt(item_net_amount.base_net_amount, 2)
                             document_row['input_tax'] += flt(item_wise_tax_detail[item][1], 2)
-                            
-                        if tax_declaration_company_setup.item_capital_goods and item_tax_template == tax_declaration_company_setup.item_capital_goods:
+                            matched = True
+                        
+                        # Capital Goods matching
+                        if not matched and tax_declaration_company_setup.item_capital_goods and item_tax_template == tax_declaration_company_setup.item_capital_goods:
                             document_row['capital_goods'] += flt(item_net_amount.base_net_amount, 2)
                             document_row['input_tax'] += flt(item_wise_tax_detail[item][1], 2)
-                        elif tax_declaration_company_setup.capital_goods and taxes_and_charges == tax_declaration_company_setup.capital_goods:
+                            matched = True
+                        elif not matched and tax_declaration_company_setup.capital_goods and (taxes_and_charges == tax_declaration_company_setup.capital_goods or account_matches_purchase_template(account_head, tax_declaration_company_setup.capital_goods)):
                             document_row['capital_goods'] += flt(item_net_amount.base_net_amount, 2)
                             document_row['input_tax'] += flt(item_wise_tax_detail[item][1], 2)
+                            matched = True
 
                         # net amount row is found, exit loop
                         break
