@@ -9,6 +9,42 @@ from aruga_acct.aruga_accounting.bir_forms import return_document
 import json
 import calendar
 
+def get_accounts_from_template(template_name):
+    """
+    Fetch all account_head values from a Sales Taxes and Charges Template.
+    Returns a list of account names configured in the template.
+    """
+    if not template_name:
+        return []
+    
+    try:
+        template_doc = frappe.get_doc('Sales Taxes and Charges Template', template_name)
+        accounts = []
+        for tax_row in template_doc.taxes:
+            if hasattr(tax_row, 'account_head') and tax_row.account_head:
+                accounts.append(tax_row.account_head)
+        return accounts
+    except:
+        return []
+
+def account_matches_template(account_head, template_name):
+    """
+    Check if account_head matches a template.
+    Supports:
+    1. Direct match: account_head == template_name
+    2. Template match: account_head is in the list of accounts configured in template
+    """
+    if not account_head or not template_name:
+        return False
+    
+    # Direct match fallback
+    if account_head == template_name:
+        return True
+    
+    # Check if account is in template's accounts list
+    template_accounts = get_accounts_from_template(template_name)
+    return account_head in template_accounts
+
 def execute(filters=None):
     columns, data = [], []
 
@@ -80,6 +116,7 @@ def get_data(company, year, month):
         SELECT
             si.name,
             si.customer,
+            stac.account_head,
             stac.base_tax_amount,
             stac.item_wise_tax_detail
         FROM
@@ -107,7 +144,11 @@ def get_data(company, year, month):
     for tax_line in si_base_tax_amounts:
         if tax_line.item_wise_tax_detail:
             item_wise_tax_detail = json.loads(tax_line.item_wise_tax_detail)
+            account_head = tax_line.get('account_head', '')
+            
             for item in item_wise_tax_detail.keys():
+                matched = False
+                
                 # loop to find net amount
                 for item_net_amount in si_base_net_amounts:                
                     if item_net_amount.name == tax_line.name and item_net_amount.item_name == item:
@@ -149,22 +190,28 @@ def get_data(company, year, month):
 
                         # taxable_net, zero_rated, exempt
                         # total_sales, gross_taxable, output_tax
-                        if tax_declaration_company_setup.item_vat_sales and item_tax_template == tax_declaration_company_setup.item_vat_sales:
+                        if not matched and tax_declaration_company_setup.item_vat_sales and item_tax_template == tax_declaration_company_setup.item_vat_sales:
                             document_row['taxable_net'] += flt(item_net_amount.base_net_amount, 2)
                             document_row['output_tax'] += flt(item_wise_tax_detail[item][1], 2)
-                        elif tax_declaration_company_setup.vat_sales and taxes_and_charges == tax_declaration_company_setup.vat_sales:
+                            matched = True
+                        elif not matched and tax_declaration_company_setup.vat_sales and (taxes_and_charges == tax_declaration_company_setup.vat_sales or account_matches_template(account_head, tax_declaration_company_setup.vat_sales)):
                             document_row['taxable_net'] += flt(item_net_amount.base_net_amount, 2)
                             document_row['output_tax'] += flt(item_wise_tax_detail[item][1], 2)
+                            matched = True
                             
-                        if tax_declaration_company_setup.item_zero_rated_sales and item_tax_template == tax_declaration_company_setup.item_zero_rated_sales:
+                        if not matched and tax_declaration_company_setup.item_zero_rated_sales and item_tax_template == tax_declaration_company_setup.item_zero_rated_sales:
                             document_row['zero_rated'] += flt(item_net_amount.base_net_amount, 2)
-                        elif tax_declaration_company_setup.zero_rated_sales and taxes_and_charges == tax_declaration_company_setup.zero_rated_sales:
+                            matched = True
+                        elif not matched and tax_declaration_company_setup.zero_rated_sales and (taxes_and_charges == tax_declaration_company_setup.zero_rated_sales or account_matches_template(account_head, tax_declaration_company_setup.zero_rated_sales)):
                             document_row['zero_rated'] += flt(item_net_amount.base_net_amount, 2)
+                            matched = True
                             
-                        if tax_declaration_company_setup.item_exempt_sales and item_tax_template == tax_declaration_company_setup.item_exempt_sales:
+                        if not matched and tax_declaration_company_setup.item_exempt_sales and item_tax_template == tax_declaration_company_setup.item_exempt_sales:
                             document_row['exempt'] += flt(item_net_amount.base_net_amount, 2)
-                        elif tax_declaration_company_setup.exempt_sales and taxes_and_charges == tax_declaration_company_setup.exempt_sales:
+                            matched = True
+                        elif not matched and tax_declaration_company_setup.exempt_sales and (taxes_and_charges == tax_declaration_company_setup.exempt_sales or account_matches_template(account_head, tax_declaration_company_setup.exempt_sales)):
                             document_row['exempt'] += flt(item_net_amount.base_net_amount, 2)
+                            matched = True
 
                         # net amount row is found, exit loop
                         break
