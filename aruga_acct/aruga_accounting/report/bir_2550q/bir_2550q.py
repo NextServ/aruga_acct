@@ -311,6 +311,11 @@ def compute_totals(company, year, quarter, input_tax_carried_over_from_previous_
                         totals['exempt_sales']['total_base_tax_amount'] += flt(item_wise_tax_detail[item][1], 2)
                         matched = True
                     
+                    # Fallback: if no template matching rules apply, add to VAT Sales (for reports without templates)
+                    if not matched:
+                        totals['vat_sales']['total_base_tax_base'] += flt(item_net_amount.base_net_amount, 2)
+                        totals['vat_sales']['total_base_tax_amount'] += flt(item_wise_tax_detail[item][1], 2)
+                    
                     break
 
     for tax_line in pi_base_tax_amounts:
