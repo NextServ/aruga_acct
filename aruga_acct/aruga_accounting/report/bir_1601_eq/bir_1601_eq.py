@@ -92,12 +92,13 @@ def get_data(filters):
 
     # Format tax_rate and add tax_still_due, total_amount_still_due for all rows
     for row in data:
-        gross_tax_base = row.get("base_tax_base") or 0
-        tax_withheld = row.get("base_tax_withheld") or 0
-        row["base_tax_base"] = gross_tax_base - tax_withheld
-
+        # Tax base is just the net total, without subtracting the withholding tax
+        # The tax_withheld is shown separately in the report
         if row.get("tax_rate") is not None:
-            row["tax_rate"] = f"{int(row['tax_rate'])}%"
+            try:
+                row["tax_rate"] = f"{int(float(row['tax_rate']))}%"
+            except (ValueError, TypeError):
+                row["tax_rate"] = "-"
         else:
             row["tax_rate"] = "-"  # Handle null tax_rate
 
