@@ -209,7 +209,6 @@ def compute_totals(company, year, quarter, input_tax_carried_over_from_previous_
             pi.docstatus = 1
             AND pi.is_return = 0
             AND (a.account_type IN ('Tax', 'Payable', '') OR a.account_type IS NULL)
-            AND a.name NOT LIKE '%%Withholding%%'
             AND pi.company = %s
             AND pi.posting_date >= %s
             AND pi.posting_date <= %s

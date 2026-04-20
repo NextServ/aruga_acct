@@ -266,7 +266,6 @@ def get_data(filters, tax_declaration_company_setup):
             pi.docstatus = 1
             AND pi.is_return = 0
             AND (a.account_type IN ('Tax', 'Payable', '') OR a.account_type IS NULL)
-            AND a.name NOT LIKE '%%Withholding%%'
             AND pi.company = %s
             AND YEAR(pi.posting_date) = %s
             AND MONTH(pi.posting_date) = %s
