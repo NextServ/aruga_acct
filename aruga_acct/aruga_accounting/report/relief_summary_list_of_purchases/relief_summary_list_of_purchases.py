@@ -66,6 +66,7 @@ def get_data(company, year, month):
         SELECT 
             pi.name, 
             pi.supplier,
+            COALESCE(ptac_totals.final_total, pi.total) as invoice_total,
             (COALESCE(NULLIF(pii.item_code, ''), pii.item_name)) AS item_name, 
             pii.item_tax_template, 
             pi.taxes_and_charges, 
@@ -76,8 +77,22 @@ def get_data(company, year, month):
             `tabPurchase Invoice` pi
         ON
             pii.parent = pi.name
+        LEFT JOIN
+            (
+                SELECT 
+                    ptac.parent, 
+                    SUM(ptac.total) as final_total
+                FROM `tabPurchase Taxes and Charges` ptac
+                INNER JOIN `tabAccount` a ON ptac.account_head = a.name
+                WHERE ptac.tax_amount_after_discount_amount >= 0
+                    AND (a.account_type IN ('Tax', 'Payable', '') OR a.account_type IS NULL)
+                GROUP BY ptac.parent
+            ) ptac_totals
+        ON
+            pi.name = ptac_totals.parent
         WHERE
             pi.docstatus = 1
+            AND pi.is_return = 0
             AND pi.company = %s
             AND YEAR(pi.posting_date) = %s
             AND MONTH(pi.posting_date) = %s
@@ -88,6 +103,7 @@ def get_data(company, year, month):
         SELECT
             pi.name,
             pi.supplier,
+            COALESCE(ptac_totals.final_total, pi.total) as invoice_total,
             ptac.account_head,
             ptac.base_tax_amount,
             ptac.item_wise_tax_detail
@@ -101,9 +117,22 @@ def get_data(company, year, month):
             `tabAccount` a
         ON
             ptac.account_head = a.name
+        LEFT JOIN
+            (
+                SELECT 
+                    ptac2.parent, 
+                    SUM(ptac2.total) as final_total
+                FROM `tabPurchase Taxes and Charges` ptac2
+                INNER JOIN `tabAccount` a2 ON ptac2.account_head = a2.name
+                WHERE ptac2.tax_amount_after_discount_amount >= 0
+                    AND (a2.account_type IN ('Tax', 'Payable', '') OR a2.account_type IS NULL)
+                GROUP BY ptac2.parent
+            ) ptac_totals
+        ON
+            pi.name = ptac_totals.parent
         WHERE
             pi.docstatus = 1
-            AND (ptac.base_tax_amount >= 0 AND ptac.add_deduct_tax = 'Add' OR ptac.base_tax_amount IS NULL)
+            AND pi.is_return = 0
             AND (a.account_type in ('Tax', 'Payable', '') or a.account_type is NULL OR a.account_type IS NULL)
             AND pi.company = %s
             AND YEAR(pi.posting_date) = %s
@@ -150,6 +179,7 @@ def get_data(company, year, month):
                                 'address': supplier_information['address_line1']
                                      + (" {0}".format(supplier_information['address_line2']) if supplier_information['address_line2'] else "")
                                      + (" {0}".format(supplier_information['city']) if supplier_information['city'] else ""),
+                                'invoice_total': flt(item_net_amount.invoice_total, 2),
                                 'zero_rated': 0,
                                 'exempt': 0,
                                 'gross_taxable': 0,
@@ -208,6 +238,22 @@ def get_data(company, year, month):
                             document_row['input_tax'] += flt(item_wise_tax_detail[item][1], 2)
                             matched = True
 
+                        # Fallback: match based on account head naming pattern if no template matched
+                        if not matched and 'VAT' in account_head:
+                            document_row['other_than_capital_goods'] += flt(item_net_amount.base_net_amount, 2)
+                            document_row['input_tax'] += flt(item_wise_tax_detail[item][1], 2)
+                            matched = True
+                        elif not matched and 'Withholding' in account_head:
+                            # Withholding tax - add to input tax but not to any goods category
+                            document_row['input_tax'] += flt(item_wise_tax_detail[item][1], 2)
+                            matched = True
+                        elif not matched and 'Zero' in account_head:
+                            document_row['zero_rated'] += flt(item_net_amount.base_net_amount, 2)
+                            matched = True
+                        elif not matched and 'Exempt' in account_head:
+                            document_row['exempt'] += flt(item_net_amount.base_net_amount, 2)
+                            matched = True
+
                         # net amount row is found, exit loop
                         break
     
@@ -237,9 +283,10 @@ def get_data(company, year, month):
                 'address': supplier_information['address_line1']
                      + (" {0}".format(supplier_information['address_line2']) if supplier_information['address_line2'] else "")
                      + (" {0}".format(supplier_information['city']) if supplier_information['city'] else ""),
+                'invoice_total': flt(item_net_amount.invoice_total, 2),
                 'zero_rated': 0,
                 'exempt': 0,
-                'gross_taxable': flt(item_net_amount.base_net_amount, 2),
+                'gross_taxable': flt(item_net_amount.invoice_total, 2),
                 'services': 0,
                 'other_than_capital_goods': flt(item_net_amount.base_net_amount, 2),
                 'capital_goods': 0,
@@ -251,7 +298,7 @@ def get_data(company, year, month):
 
     for row in data:
         row['taxable_net'] = row['services'] + row['other_than_capital_goods'] + row['capital_goods']
-        row['gross_taxable'] = row['taxable_net'] + row['input_tax']
+        row['gross_taxable'] = row['invoice_total']
         row['total_purchases'] = row['taxable_net'] + row['zero_rated'] + row['exempt']
         # row['total_purchases'] = frappe.db.get_value('Purchase Invoice', row['purchase_invoice'], 'base_grand_total')
 

@@ -93,7 +93,8 @@ def get_data(company, year, month):
     si_base_net_amounts = frappe.db.sql("""
         SELECT 
             si.name, 
-            si.customer, 
+            si.customer,
+            COALESCE(stac_totals.final_total, si.total) as invoice_total,
             (COALESCE(NULLIF(sii.item_code, ''), sii.item_name)) AS item_name, 
             sii.item_tax_template, 
             si.taxes_and_charges, 
@@ -104,8 +105,22 @@ def get_data(company, year, month):
             `tabSales Invoice` si
         ON
             sii.parent = si.name
+        LEFT JOIN
+            (
+                SELECT 
+                    stac.parent, 
+                    SUM(stac.total) as final_total
+                FROM `tabSales Taxes and Charges` stac
+                INNER JOIN `tabAccount` a ON stac.account_head = a.name
+                WHERE stac.tax_amount_after_discount_amount >= 0
+                    AND (a.account_type IN ('Tax', 'Payable', '') OR a.account_type IS NULL)
+                GROUP BY stac.parent
+            ) stac_totals
+        ON
+            si.name = stac_totals.parent
         WHERE
             si.docstatus = 1
+            AND si.is_return = 0
             AND si.company = %s
             AND YEAR(si.posting_date) = %s
             AND MONTH(si.posting_date) = %s
@@ -116,6 +131,7 @@ def get_data(company, year, month):
         SELECT
             si.name,
             si.customer,
+            COALESCE(stac_totals.final_total, si.total) as invoice_total,
             stac.account_head,
             stac.base_tax_amount,
             stac.item_wise_tax_detail
@@ -129,9 +145,22 @@ def get_data(company, year, month):
             `tabAccount` a
         ON
             stac.account_head = a.name
+        LEFT JOIN
+            (
+                SELECT 
+                    stac2.parent, 
+                    SUM(stac2.total) as final_total
+                FROM `tabSales Taxes and Charges` stac2
+                INNER JOIN `tabAccount` a2 ON stac2.account_head = a2.name
+                WHERE stac2.tax_amount_after_discount_amount >= 0
+                    AND (a2.account_type IN ('Tax', 'Payable', '') OR a2.account_type IS NULL)
+                GROUP BY stac2.parent
+            ) stac_totals
+        ON
+            si.name = stac_totals.parent
         WHERE
             si.docstatus = 1
-            AND (stac.base_tax_amount >= 0 OR stac.base_tax_amount IS NULL)
+            AND si.is_return = 0
             AND (a.account_type in ('Tax', 'Payable', '') or a.account_type is NULL OR a.account_type IS NULL)
             AND si.company = %s
             AND YEAR(si.posting_date) = %s
@@ -178,6 +207,7 @@ def get_data(company, year, month):
                                 'address': customer_information['address_line1']
                                      + (" {0}".format(customer_information['address_line2']) if customer_information['address_line2'] else "")
                                      + (" {0}".format(customer_information['city']) if customer_information['city'] else ""),
+                                'invoice_total': flt(item_net_amount.invoice_total, 2),
                                 'total_sales': 0,
                                 'zero_rated': 0,
                                 'exempt': 0,
@@ -213,6 +243,18 @@ def get_data(company, year, month):
                             document_row['exempt'] += flt(item_net_amount.base_net_amount, 2)
                             matched = True
 
+                        # Fallback: match based on account head naming pattern if no template matched
+                        if not matched and 'VAT' in account_head:
+                            document_row['taxable_net'] += flt(item_net_amount.base_net_amount, 2)
+                            document_row['output_tax'] += flt(item_wise_tax_detail[item][1], 2)
+                            matched = True
+                        elif not matched and 'Zero' in account_head:
+                            document_row['zero_rated'] += flt(item_net_amount.base_net_amount, 2)
+                            matched = True
+                        elif not matched and 'Exempt' in account_head:
+                            document_row['exempt'] += flt(item_net_amount.base_net_amount, 2)
+                            matched = True
+
                         # net amount row is found, exit loop
                         break
     
@@ -242,10 +284,11 @@ def get_data(company, year, month):
                 'address': customer_information['address_line1']
                      + (" {0}".format(customer_information['address_line2']) if customer_information['address_line2'] else "")
                      + (" {0}".format(customer_information['city']) if customer_information['city'] else ""),
-                'total_sales': flt(item_net_amount.base_net_amount, 2),
+                'invoice_total': flt(item_net_amount.invoice_total, 2),
+                'total_sales': flt(item_net_amount.invoice_total, 2),
                 'zero_rated': 0,
                 'exempt': 0,
-                'gross_taxable': flt(item_net_amount.base_net_amount, 2),
+                'gross_taxable': flt(item_net_amount.invoice_total, 2),
                 'taxable_net': flt(item_net_amount.base_net_amount, 2),
                 'output_tax': 0,
             }
@@ -253,7 +296,7 @@ def get_data(company, year, month):
             data.append(document_row)
 
     for row in data:
-        row['gross_taxable'] = row['taxable_net'] + row['output_tax']
+        row['gross_taxable'] = row['invoice_total']
         row['total_sales'] = row['taxable_net'] + row['zero_rated'] + row['exempt']
 
     return data
