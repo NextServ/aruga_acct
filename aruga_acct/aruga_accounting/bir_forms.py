@@ -77,10 +77,20 @@ def bir_2307(company, supplier, employee, doctype, purchase_invoice, payment_ent
     else:
         payee_information = get_supplier_information(supplier)
 
+    try:
+        payor_information = get_company_information(company)
+    except frappe.exceptions.DoesNotExistError:
+        error_message = "Please create a PH Localization Company Setup record for {0}".format(company)
+        # If JSON response is requested, return error in JSON format for client-side validation
+        if response_type == 'json':
+            frappe.throw(error_message)
+        # For PDF, let the error propagate
+        frappe.throw(error_message)
+
     context = {
         'from_date': getdate(from_date),
         'to_date': getdate(to_date),
-        'payor': get_company_information(company),
+        'payor': payor_information,
         'payee': payee_information,
         'data_ip': data_ip,
         'ip_month_1_total': ip_month_1_total,
@@ -103,6 +113,10 @@ def bir_2307(company, supplier, employee, doctype, purchase_invoice, payment_ent
     html = frappe.render_template("templates/bir_forms/bir_2307_template.html", context)
     options["page-size"] = "Legal"
 
+    # If JSON response is requested, return a success indicator
+    if response_type == 'json':
+        return {'status': 'success'}
+    
     return_pdf_document(html, filename, options, response_type)
 
 @frappe.whitelist()

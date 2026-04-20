@@ -156,10 +156,39 @@ frappe.query_reports["BIR 2307"] = {
                 'from_date': frappe.query_report.get_filter_value('from_date'),
                 'to_date': frappe.query_report.get_filter_value('to_date'),
             };
-            let u = new URLSearchParams(filter_values).toString();
-
-            var bir_form_url = frappe.urllib.get_full_url('/api/method/aruga_acct.aruga_accounting.bir_forms.bir_2307?' + u + '&response_type=pdf')
-            let bir_form = window.open(bir_form_url);
+            
+            // First validate that all required setup exists
+            frappe.call({
+                method: 'aruga_acct.aruga_accounting.bir_forms.bir_2307',
+                args: Object.assign({}, filter_values, { response_type: 'json' }),
+                freeze: true,
+                freeze_message: __('Validating setup...'),
+                callback: function (r) {
+                    if (r.message) {
+                        // Setup is valid, open PDF
+                        let u = new URLSearchParams(filter_values).toString();
+                        var bir_form_url = frappe.urllib.get_full_url('/api/method/aruga_acct.aruga_accounting.bir_forms.bir_2307?' + u + '&response_type=pdf')
+                        let bir_form = window.open(bir_form_url);
+                    }
+                },
+                error: function (r) {
+                    // Show error in modal
+                    let error_message = r.responseJSON?.exc || r.responseText || 'Unknown error occurred';
+                    
+                    // Extract the meaningful error message from the traceback
+                    if (error_message.includes('PH Localization Company Setup')) {
+                        error_message = 'Please create a PH Localization Company Setup record for the selected company.';
+                    } else if (error_message.includes('Does not exist')) {
+                        error_message = 'Required company setup configuration is missing. Please contact your administrator.';
+                    }
+                    
+                    frappe.msgprint({
+                        title: __('Setup Required'),
+                        indicator: 'red',
+                        message: error_message
+                    });
+                }
+            });
         });
 
         let filter_based_on = frappe.query_report.get_filter_value('doctype');
