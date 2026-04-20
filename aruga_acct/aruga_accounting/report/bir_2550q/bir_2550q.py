@@ -182,6 +182,7 @@ def compute_totals(company, year, quarter, input_tax_carried_over_from_previous_
             pii.parent = pi.name
         WHERE
             pi.docstatus = 1
+            AND pi.is_return = 0
             AND pi.company = %s
             AND pi.posting_date >= %s
             AND pi.posting_date <= %s
@@ -192,7 +193,7 @@ def compute_totals(company, year, quarter, input_tax_carried_over_from_previous_
         SELECT
             pi.name,
             ptac.account_head,
-            CASE WHEN pi.is_return = 1 THEN -ptac.base_tax_amount ELSE ptac.base_tax_amount END AS base_tax_amount,
+            ptac.base_tax_amount AS base_tax_amount,
             ptac.item_wise_tax_detail
         FROM
             `tabPurchase Invoice` pi
@@ -206,6 +207,7 @@ def compute_totals(company, year, quarter, input_tax_carried_over_from_previous_
             ptac.account_head = a.name
         WHERE
             pi.docstatus = 1
+            AND pi.is_return = 0
             AND (a.account_type IN ('Tax', 'Payable', '') OR a.account_type IS NULL)
             AND a.name NOT LIKE '%%Withholding%%'
             AND pi.company = %s
@@ -228,6 +230,7 @@ def compute_totals(company, year, quarter, input_tax_carried_over_from_previous_
             sii.parent = si.name
         WHERE
             si.docstatus = 1
+            AND si.is_return = 0
             AND si.company = %s
             AND si.posting_date >= %s
             AND si.posting_date <= %s
@@ -238,7 +241,7 @@ def compute_totals(company, year, quarter, input_tax_carried_over_from_previous_
         SELECT
             si.name,
             stac.account_head,
-            CASE WHEN si.is_return = 1 THEN -stac.base_tax_amount ELSE stac.base_tax_amount END AS base_tax_amount,
+            stac.base_tax_amount AS base_tax_amount,
             stac.item_wise_tax_detail
         FROM
             `tabSales Invoice` si
@@ -252,6 +255,7 @@ def compute_totals(company, year, quarter, input_tax_carried_over_from_previous_
             stac.account_head = a.name
         WHERE
             si.docstatus = 1
+            AND si.is_return = 0
             AND (a.account_type IN ('Tax', 'Payable', '') OR a.account_type IS NULL)
             AND a.name NOT LIKE '%%Withholding%%'
             AND si.company = %s
