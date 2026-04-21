@@ -191,7 +191,6 @@ def get_data(filters, tax_declaration_company_setup):
         WHERE
             si.company = %s
             AND si.docstatus = 1
-            AND si.is_return = 0
             AND YEAR(si.posting_date) = %s
             AND MONTH(si.posting_date) = %s
         GROUP BY si.name, (COALESCE(NULLIF(sii.item_code, ''), sii.item_name)), sii.item_tax_template, si.taxes_and_charges;
@@ -215,7 +214,6 @@ def get_data(filters, tax_declaration_company_setup):
             stac.account_head = a.name
         WHERE
             si.docstatus = 1
-            AND si.is_return = 0
             AND (a.account_type IN ('Tax', 'Payable', '') OR a.account_type IS NULL)
             AND a.name NOT LIKE '%%Withholding%%'
             AND si.company = %s
@@ -240,7 +238,6 @@ def get_data(filters, tax_declaration_company_setup):
         WHERE
             pi.company = %s
             AND pi.docstatus = 1
-            AND pi.is_return = 0
             AND YEAR(pi.posting_date) = %s
             AND MONTH(pi.posting_date) = %s
         GROUP BY pi.name, (COALESCE(NULLIF(pii.item_code, ''), pii.item_name)), pii.item_tax_template, pi.taxes_and_charges;
@@ -249,9 +246,12 @@ def get_data(filters, tax_declaration_company_setup):
     pi_base_tax_amounts = frappe.db.sql("""
         SELECT
             pi.name,
-            ptac.account_head,
-            ptac.base_tax_amount AS base_tax_amount,
-            ptac.item_wise_tax_detail
+            SUM(ptac.base_tax_amount) as base_tax_amount,
+            CONCAT(
+                '{"Service Example":[0,',
+                ROUND(SUM(CAST(JSON_EXTRACT(ptac.item_wise_tax_detail, '$.\"Service Example\"[1]') AS DECIMAL(20,4))), 2),
+                ']}'
+            ) as item_wise_tax_detail
         FROM
             `tabPurchase Invoice` pi
         INNER JOIN
@@ -264,11 +264,11 @@ def get_data(filters, tax_declaration_company_setup):
             ptac.account_head = a.name
         WHERE
             pi.docstatus = 1
-            AND pi.is_return = 0
             AND (a.account_type IN ('Tax', 'Payable', '') OR a.account_type IS NULL)
             AND pi.company = %s
             AND YEAR(pi.posting_date) = %s
             AND MONTH(pi.posting_date) = %s
+        GROUP BY pi.name
         """, (company, year, month), as_dict=1)
 
     # Process Sales Invoices

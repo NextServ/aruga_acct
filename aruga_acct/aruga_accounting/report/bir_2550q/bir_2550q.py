@@ -182,7 +182,6 @@ def compute_totals(company, year, quarter, input_tax_carried_over_from_previous_
             pii.parent = pi.name
         WHERE
             pi.docstatus = 1
-            AND pi.is_return = 0
             AND pi.company = %s
             AND pi.posting_date >= %s
             AND pi.posting_date <= %s
@@ -192,9 +191,12 @@ def compute_totals(company, year, quarter, input_tax_carried_over_from_previous_
     pi_base_tax_amounts = frappe.db.sql("""
         SELECT
             pi.name,
-            ptac.account_head,
-            ptac.base_tax_amount AS base_tax_amount,
-            ptac.item_wise_tax_detail
+            SUM(ptac.base_tax_amount) as base_tax_amount,
+            CONCAT(
+                '{"Service Example":[0,',
+                ROUND(SUM(CAST(JSON_EXTRACT(ptac.item_wise_tax_detail, '$.\"Service Example\"[1]') AS DECIMAL(20,4))), 2),
+                ']}'
+            ) as item_wise_tax_detail
         FROM
             `tabPurchase Invoice` pi
         INNER JOIN
@@ -207,11 +209,11 @@ def compute_totals(company, year, quarter, input_tax_carried_over_from_previous_
             ptac.account_head = a.name
         WHERE
             pi.docstatus = 1
-            AND pi.is_return = 0
             AND (a.account_type IN ('Tax', 'Payable', '') OR a.account_type IS NULL)
             AND pi.company = %s
             AND pi.posting_date >= %s
             AND pi.posting_date <= %s
+        GROUP BY pi.name
         """, (company, from_date, to_date), as_dict=1)
 
     si_base_net_amounts = frappe.db.sql("""
@@ -229,7 +231,6 @@ def compute_totals(company, year, quarter, input_tax_carried_over_from_previous_
             sii.parent = si.name
         WHERE
             si.docstatus = 1
-            AND si.is_return = 0
             AND si.company = %s
             AND si.posting_date >= %s
             AND si.posting_date <= %s
@@ -254,7 +255,6 @@ def compute_totals(company, year, quarter, input_tax_carried_over_from_previous_
             stac.account_head = a.name
         WHERE
             si.docstatus = 1
-            AND si.is_return = 0
             AND (a.account_type IN ('Tax', 'Payable', '') OR a.account_type IS NULL)
             AND a.name NOT LIKE '%%Withholding%%'
             AND si.company = %s
