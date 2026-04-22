@@ -66,7 +66,11 @@ def get_data(company, year, month):
         SELECT 
             pi.name, 
             pi.supplier,
-            COALESCE(ptac_totals.final_total, pi.total) as invoice_total,
+            pi.is_return,
+            CASE
+                WHEN pi.is_return = 1 THEN COALESCE(ptac_return_totals.final_total, pi.total)
+                ELSE COALESCE(ptac_totals.final_total, pi.total)
+            END as invoice_total,
             (COALESCE(NULLIF(pii.item_code, ''), pii.item_name)) AS item_name, 
             pii.item_tax_template, 
             pi.taxes_and_charges, 
@@ -90,20 +94,35 @@ def get_data(company, year, month):
             ) ptac_totals
         ON
             pi.name = ptac_totals.parent
+        LEFT JOIN
+            (
+                SELECT
+                    ptac.parent,
+                    SUM(ptac.total) as final_total
+                FROM `tabPurchase Taxes and Charges` ptac
+                INNER JOIN `tabAccount` a ON ptac.account_head = a.name
+                WHERE ptac.tax_amount_after_discount_amount < 0
+                    AND (a.account_type IN ('Tax', 'Payable', '') OR a.account_type IS NULL)
+                GROUP BY ptac.parent
+            ) ptac_return_totals
+        ON
+            pi.name = ptac_return_totals.parent
         WHERE
             pi.docstatus = 1
-            AND pi.is_return = 0
             AND pi.company = %s
             AND YEAR(pi.posting_date) = %s
             AND MONTH(pi.posting_date) = %s
-        GROUP BY pi.name, pi.supplier, (COALESCE(NULLIF(pii.item_code, ''), pii.item_name)), pii.item_tax_template, pi.taxes_and_charges;
+        GROUP BY pi.name, pi.supplier, pi.is_return, (COALESCE(NULLIF(pii.item_code, ''), pii.item_name)), pii.item_tax_template, pi.taxes_and_charges;
         """, (company, year, month), as_dict=1)
 
     pi_base_tax_amounts = frappe.db.sql("""
         SELECT
             pi.name,
             pi.supplier,
-            COALESCE(ptac_totals.final_total, pi.total) as invoice_total,
+            CASE
+                WHEN pi.is_return = 1 THEN COALESCE(ptac_return_totals.final_total, pi.total)
+                ELSE COALESCE(ptac_totals.final_total, pi.total)
+            END as invoice_total,
             ptac.account_head,
             ptac.base_tax_amount,
             ptac.item_wise_tax_detail
@@ -130,9 +149,21 @@ def get_data(company, year, month):
             ) ptac_totals
         ON
             pi.name = ptac_totals.parent
+        LEFT JOIN
+            (
+                SELECT
+                    ptac3.parent,
+                    SUM(ptac3.total) as final_total
+                FROM `tabPurchase Taxes and Charges` ptac3
+                INNER JOIN `tabAccount` a3 ON ptac3.account_head = a3.name
+                WHERE ptac3.tax_amount_after_discount_amount < 0
+                    AND (a3.account_type IN ('Tax', 'Payable', '') OR a3.account_type IS NULL)
+                GROUP BY ptac3.parent
+            ) ptac_return_totals
+        ON
+            pi.name = ptac_return_totals.parent
         WHERE
             pi.docstatus = 1
-            AND pi.is_return = 0
             AND (a.account_type in ('Tax', 'Payable', '') or a.account_type is NULL OR a.account_type IS NULL)
             AND pi.company = %s
             AND YEAR(pi.posting_date) = %s
@@ -259,6 +290,9 @@ def get_data(company, year, month):
     
     # Process invoices WITHOUT taxes - default to taxable goods
     for item_net_amount in pi_base_net_amounts:
+        if item_net_amount.is_return:
+            continue
+
         # Check if this invoice already processed (has taxes)
         existing_row = next((row for row in data if row.get('purchase_invoice') == item_net_amount.name), None)
         if not existing_row:
