@@ -94,6 +94,7 @@ def get_data(company, year, month):
         SELECT 
             si.name, 
             si.customer,
+            si.is_return,
             COALESCE(stac_totals.final_total, si.total) as invoice_total,
             (COALESCE(NULLIF(sii.item_code, ''), sii.item_name)) AS item_name, 
             sii.item_tax_template, 
@@ -120,11 +121,10 @@ def get_data(company, year, month):
             si.name = stac_totals.parent
         WHERE
             si.docstatus = 1
-            AND si.is_return = 0
             AND si.company = %s
             AND YEAR(si.posting_date) = %s
             AND MONTH(si.posting_date) = %s
-        GROUP BY si.name, si.customer, (COALESCE(NULLIF(sii.item_code, ''), sii.item_name)), sii.item_tax_template, si.taxes_and_charges;
+        GROUP BY si.name, si.customer, si.is_return, (COALESCE(NULLIF(sii.item_code, ''), sii.item_name)), sii.item_tax_template, si.taxes_and_charges;
         """, (company, year, month), as_dict=1)
 
     si_base_tax_amounts = frappe.db.sql("""
@@ -160,7 +160,6 @@ def get_data(company, year, month):
             si.name = stac_totals.parent
         WHERE
             si.docstatus = 1
-            AND si.is_return = 0
             AND (a.account_type in ('Tax', 'Payable', '') or a.account_type is NULL OR a.account_type IS NULL)
             AND si.company = %s
             AND YEAR(si.posting_date) = %s
@@ -260,6 +259,9 @@ def get_data(company, year, month):
     
     # Process invoices WITHOUT taxes - default to taxable
     for item_net_amount in si_base_net_amounts:
+        if item_net_amount.is_return:
+            continue
+
         # Check if this invoice already processed (has taxes)
         existing_row = next((row for row in data if row.get('sales_invoice') == item_net_amount.name), None)
         if not existing_row:
